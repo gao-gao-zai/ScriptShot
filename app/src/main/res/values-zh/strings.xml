@@ -21,6 +21,11 @@
     <string name="config_button_test_capture">立即测试截屏</string>
     <string name="config_button_refresh_status">刷新状态</string>
     <string name="config_button_manage_scripts">管理脚本</string>
+    <string name="config_button_export_logs">导出日志到下载目录</string>
+    <string name="config_export_logs_no_file">当前还没有生成 engine.log 日志文件。</string>
+    <string name="config_export_logs_failed">导出日志失败。</string>
+    <string name="config_export_logs_success">日志已导出到：%1$s</string>
+    <string name="config_export_logs_permission_denied">存储权限被拒绝，无法导出日志。</string>
     <string name="shortcut_label_capture">ScriptShot 截屏</string>
     <string name="shortcut_label_script">运行 %1$s</string>
     <string name="shortcut_created_toast">已发送快捷方式请求。</string>

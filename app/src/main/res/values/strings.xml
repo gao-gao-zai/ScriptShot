@@ -21,6 +21,7 @@
     <string name="config_button_test_capture">Test capture now</string>
     <string name="config_button_refresh_status">Refresh status</string>
     <string name="config_button_manage_scripts">Manage scripts</string>
+    <string name="config_button_export_logs">Export logs to Downloads</string>
     <string name="shortcut_label_capture">ScriptShot Capture</string>
     <string name="shortcut_label_script">Run %1$s</string>
     <string name="shortcut_created_toast">Shortcut request sent</string>
@@ -76,6 +77,10 @@
     <string name="prompt_cancel">Cancel</string>
     <string name="prompt_confirm">OK</string>
     <string name="help_title">如何使用 ScriptShot</string>
+    <string name="config_export_logs_no_file">No engine.log found yet.</string>
+    <string name="config_export_logs_failed">Failed to export logs.</string>
+    <string name="config_export_logs_success">Logs exported to %1$s</string>
+    <string name="config_export_logs_permission_denied">Storage permission denied; cannot export logs.</string>
     <string name="help_getting_started_title">快速上手</string>
     <string name="help_getting_started_body">1. 授予媒体/存储读取权限，让 ScriptShot 可以读取最新截图。
 2. 选择截屏方式：Root 模式 或 无障碍模式。

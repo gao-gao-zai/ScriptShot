@@ -3,6 +3,7 @@ package com.scriptshot.core.trigger;
 import android.content.Context;
 import android.content.Intent;
 
+import com.scriptshot.service.ScriptShotTriggerService;
 import com.scriptshot.ui.ShotTriggerActivity;
 
 /**
@@ -39,7 +40,18 @@ public final class TriggerContract {
     public static Intent buildRunIntent(Context context, String scriptName, boolean silent, boolean skipCapture, boolean suppressFeedback, String origin) {
         Intent intent = new Intent(context, ShotTriggerActivity.class);
         intent.setAction(ACTION_RUN_SCRIPT);
-        if (scriptName != null) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return applyTriggerExtras(intent, scriptName, silent, skipCapture, suppressFeedback, origin);
+    }
+
+    public static Intent buildRunServiceIntent(Context context, String scriptName, boolean silent, boolean skipCapture, boolean suppressFeedback, String origin) {
+        Intent intent = new Intent(context, ScriptShotTriggerService.class);
+        intent.setAction(ACTION_RUN_SCRIPT);
+        return applyTriggerExtras(intent, scriptName, silent, skipCapture, suppressFeedback, origin);
+    }
+
+    private static Intent applyTriggerExtras(Intent intent, String scriptName, boolean silent, boolean skipCapture, boolean suppressFeedback, String origin) {
+        if (scriptName != null && !scriptName.isEmpty()) {
             intent.putExtra(EXTRA_SCRIPT_NAME, scriptName);
         }
         intent.putExtra(EXTRA_SILENT, silent);
@@ -48,7 +60,6 @@ public final class TriggerContract {
         if (origin != null && !origin.isEmpty()) {
             intent.putExtra(EXTRA_ORIGIN, origin);
         }
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
 }

@@ -1,6 +1,11 @@
 package com.scriptshot.ui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
@@ -11,6 +16,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import com.scriptshot.R;
 import com.scriptshot.core.permission.PermissionManager;
@@ -32,6 +44,8 @@ public class ConfigActivity extends AppCompatActivity {
     private SwitchCompat scriptSuccessToastSwitch;
     private SwitchCompat scriptErrorToastSwitch;
     private boolean suppressSwitchCallbacks;
+
+    private static final int REQUEST_WRITE_STORAGE = 1001;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +94,7 @@ public class ConfigActivity extends AppCompatActivity {
         Button refresh = findViewById(R.id.button_refresh);
         Button manageScripts = findViewById(R.id.button_manage_scripts);
         Button help = findViewById(R.id.button_help);
+        Button exportLogs = findViewById(R.id.button_export_logs);
 
         requestPermission.setOnClickListener(v -> {
             if (PermissionManager.hasMediaReadPermission(this)) {
@@ -120,6 +135,54 @@ public class ConfigActivity extends AppCompatActivity {
             android.content.Intent intent = new android.content.Intent(this, HelpActivity.class);
             startActivity(intent);
         });
+
+        exportLogs.setOnClickListener(v -> exportLogsWithPermissionCheck());
+    }
+
+    private void exportLogsWithPermissionCheck() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            exportLogs();
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_WRITE_STORAGE);
+        } else {
+            exportLogs();
+        }
+    }
+
+    private void exportLogs() {
+        File scriptsDir = new File(getFilesDir(), "scripts");
+        File engineLog = new File(scriptsDir, "engine.log");
+        if (!engineLog.exists()) {
+            Toast.makeText(this, R.string.config_export_logs_no_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File targetDir = new File(downloadsDir, "ScriptShot");
+        if (!targetDir.exists() && !targetDir.mkdirs()) {
+            Toast.makeText(this, R.string.config_export_logs_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File outFile = new File(targetDir, "engine.log");
+
+        try (FileInputStream in = new FileInputStream(engineLog);
+             FileOutputStream out = new FileOutputStream(outFile)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+            Toast.makeText(this, getString(R.string.config_export_logs_success, outFile.getAbsolutePath()), Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(this, R.string.config_export_logs_failed, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupAutomationToggles() {
@@ -205,6 +268,12 @@ public class ConfigActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionManager.REQUEST_READ_MEDIA) {
             refreshStatus();
+        } else if (requestCode == REQUEST_WRITE_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                exportLogs();
+            } else {
+                Toast.makeText(this, R.string.config_export_logs_permission_denied, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

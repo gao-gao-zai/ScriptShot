@@ -240,6 +240,14 @@
                         android:text="@string/config_button_manage_scripts" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_export_logs"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_button_export_logs" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_help"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="match_parent"
