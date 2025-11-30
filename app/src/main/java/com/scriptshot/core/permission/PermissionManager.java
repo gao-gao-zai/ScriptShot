@@ -66,17 +66,25 @@ public final class PermissionManager {
             context.getContentResolver(),
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         );
+        String serviceId = context.getPackageName() + "/" + ScreenshotAccessibilityService.class.getName();
+        Log.d("PermissionManager", "Checking accessibility service");
+        Log.d("PermissionManager", "Looking for serviceId: " + serviceId);
+        Log.d("PermissionManager", "Enabled services: " + enabledServices);
+        
         if (enabledServices == null) {
+            Log.d("PermissionManager", "enabledServices is null, returning false");
             return false;
         }
-        String serviceId = context.getPackageName() + "/" + ScreenshotAccessibilityService.class.getName();
         android.text.TextUtils.SimpleStringSplitter splitter = new android.text.TextUtils.SimpleStringSplitter(':');
         splitter.setString(enabledServices);
         while (splitter.hasNext()) {
-            if (serviceId.equalsIgnoreCase(splitter.next())) {
+            String service = splitter.next();
+            if (serviceId.equalsIgnoreCase(service)) {
+                Log.d("PermissionManager", "Found matching service! returning true");
                 return true;
             }
         }
+        Log.d("PermissionManager", "Service not found in enabled list, returning false");
         return false;
     }
 
