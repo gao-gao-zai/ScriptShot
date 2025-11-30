@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">截屏反转</string>
+    <string name="app_name">脚本截屏</string>
     <string name="accessibility_service_description">ScriptShot 仅会在你手动触发时使用此服务请求截图。</string>
     <string name="screenshot_captured_toast">已捕获：%1$s</string>
     <string name="screenshot_timeout_toast">无法完成截图，请重试。</string>
