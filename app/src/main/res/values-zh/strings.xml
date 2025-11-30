@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">截屏反转</string>
-    <string name="accessibility_service_description">ScriptShot 仅在你主动触发时请求系统截图。</string>
+    <string name="accessibility_service_description">ScriptShot 仅会在你手动触发时使用此服务请求截图。</string>
     <string name="screenshot_captured_toast">已捕获：%1$s</string>
-    <string name="screenshot_timeout_toast">无法捕获截图，请重试。</string>
+    <string name="screenshot_timeout_toast">无法完成截图，请重试。</string>
     <string name="permission_required_toast">需要读取媒体权限才能监听截图。</string>
     <string name="accessibility_required_toast">请启用 ScriptShot 无障碍服务以截取屏幕。</string>
     <string name="config_title">截屏工作流设置</string>
-    <string name="config_capture_mode_label">选择截图方式</string>
+    <string name="config_capture_mode_label">选择截屏方式</string>
     <string name="config_mode_root">Root 模式</string>
     <string name="config_mode_accessibility">无障碍模式</string>
     <string name="config_status_storage">媒体权限：%1$s</string>
@@ -17,13 +17,28 @@
     <string name="config_status_missing">未启用</string>
     <string name="config_button_request_permission">授予媒体权限</string>
     <string name="config_button_open_accessibility">打开无障碍设置</string>
-    <string name="config_button_create_shortcut">创建截图快捷方式</string>
-    <string name="config_button_test_capture">立即测试截图</string>
+    <string name="config_button_create_shortcut">创建截屏快捷方式</string>
+    <string name="config_button_test_capture">立即测试截屏</string>
     <string name="config_button_refresh_status">刷新状态</string>
-    <string name="shortcut_label_capture">截屏触发器</string>
-    <string name="shortcut_created_toast">已请求创建桌面快捷方式</string>
-    <string name="shortcut_not_supported_toast">当前桌面不支持固定快捷方式</string>
-    <string name="config_mode_saved_toast">模式已更新</string>
+    <string name="config_button_manage_scripts">管理脚本</string>
+    <string name="shortcut_label_capture">ScriptShot 截屏</string>
+    <string name="shortcut_created_toast">已发送快捷方式请求。</string>
+    <string name="shortcut_not_supported_toast">当前桌面不支持固定快捷方式。</string>
+    <string name="config_mode_saved_toast">模式已更新。</string>
     <string name="config_permission_prompt">授予该权限后，ScriptShot 才能读取最新截图。</string>
     <string name="root_required_toast">此模式需要 Root 权限。</string>
+    <string name="script_manager_title">脚本管理</string>
+    <string name="script_list_label">脚本列表</string>
+    <string name="script_list_empty">暂无脚本，保存后即可显示。</string>
+    <string name="script_editor_label">脚本编辑器</string>
+    <string name="script_name_hint">脚本名称（如 Default.js）</string>
+    <string name="script_new_button">新建脚本</string>
+    <string name="script_save_button">保存脚本</string>
+    <string name="script_editor_placeholder">在此编写你的 Rhino 自动化代码。</string>
+    <string name="script_error_name_required">请输入脚本名称。</string>
+    <string name="script_error_invalid_name">名称中不能包含斜杠。</string>
+    <string name="script_toast_load_error">无法加载脚本。</string>
+    <string name="script_toast_save_error">无法保存脚本。</string>
+    <string name="script_toast_save_success">脚本已保存。</string>
+    <string name="script_toast_loaded">已加载 %1$s。</string>
 </resources>

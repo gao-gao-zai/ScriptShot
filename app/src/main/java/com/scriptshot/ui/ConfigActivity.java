@@ -64,6 +64,7 @@ public class ConfigActivity extends AppCompatActivity {
         Button createShortcut = findViewById(R.id.button_create_shortcut);
         Button testCapture = findViewById(R.id.button_test_capture);
         Button refresh = findViewById(R.id.button_refresh);
+        Button manageScripts = findViewById(R.id.button_manage_scripts);
 
         requestPermission.setOnClickListener(v -> {
             if (PermissionManager.hasMediaReadPermission(this)) {
@@ -88,6 +89,11 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         refresh.setOnClickListener(v -> refreshStatus());
+
+        manageScripts.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, ScriptManagerActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void refreshStatus() {

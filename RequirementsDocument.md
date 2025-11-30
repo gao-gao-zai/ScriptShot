@@ -131,7 +131,6 @@ _允许脚本在执行过程中请求用户输入。_
 
 - **多脚本管理:** 侧边栏或下拉框切换脚本 (e.g., "Default.js", "UploadToGithub.js").
 - **快捷方式绑定:** 每个脚本旁边都有一个“创建桌面图标”按钮。
-- **代码补全:** 简单的关键字提示 (`img.`, `http.`, `ui.`)。
 
 ### 4.2 运行时 (Invisible)
 
@@ -171,3 +170,57 @@ _允许脚本在执行过程中请求用户输入。_
 4.  **Phase 4: 稳定性**
     - 完善文件写入的 Check Loop。
     - 处理权限拒绝的异常流程。
+
+---
+
+## 7. Phase 2 实施细则（Rhino + 核心 API）
+
+### 7.1 依赖与构建配置
+
+- `app/build.gradle` 引入 `org.mozilla:rhino:1.7.14`，并保持 Java 17 + `minSdk 24` 兼容。
+- 所有脚本相关类统一放在 `com.scriptshot.script` 包下，便于混淆/权限管理。
+
+### 7.2 引擎骨架
+
+- `EngineManager`
+  - 单例 + `ExecutorService.newSingleThreadExecutor`，串行执行脚本避免 OOM。
+  - 在 `runScript` 中 `Context.enter()` → 关闭 JIT (`optimizationLevel = -1`) → `initStandardObjects()`。
+  - 注入 `img/files/shell/log` 全局对象，并把 `screenshotPath`、`screenshotMeta` 等绑定透传给 JS。
+- `ScriptExecutionCallback`
+  - UI 线程观测执行成功/失败，便于 Toast 或日志反馈。
+
+### 7.3 模块 API（首批完成）
+
+| 模块            | 文件                                          | 说明                                                                         |
+| --------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
+| `ImgApi`        | `com.scriptshot.script.api.ImgApi`            | `load / toBase64 / compress / delete`，删除时同步清理 MediaStore 记录。      |
+| `FilesApi`      | `com.scriptshot.script.api.FilesApi`          | `read / write / exists / list`，默认相对路径映射到 `Context#getFilesDir()`。 |
+| `ShellApi`      | `com.scriptshot.script.api.ShellApi`          | `exec` 走 `sh -c`，`sudo` 走 `su -c`，返回 `{code, stdout, stderr}`。        |
+| `ScriptStorage` | `com.scriptshot.script.storage.ScriptStorage` | 负责 `files/scripts` 与 `assets/scripts` 的脚本读写、默认脚本回退。          |
+
+### 7.4 截图闭环注入点
+
+- `ShotTriggerActivity`
+  - 在 `onScreenshotCaptured` 中调用 `runAutomationScript`。
+  - `bindings` 结构：`screenshotPath`（若无绝对路径则传 `contentUri` 字符串）、`screenshotMeta`（包含 `displayName/sizeBytes/contentUri/path`）。
+  - 成功/失败在 `mainHandler` 上记录日志，保持 UI 线程安全。
+- 未来若扩展到其他触发源（如后台监听），均应复用该 EngineManager 接口。
+
+### 7.5 默认脚本与存储
+
+- `assets/scripts/Default.js`
+  - Demo：加载截图信息、输出 Base64 长度、写入 `files/scripts/runtime.log`。
+  - 首次运行会从 assets 拷贝；用户保存自定义脚本后将覆盖到 `files/scripts/Default.js`。
+- 验收：真实截屏后，日志中可看到 `ScriptShot default script is running` & `Script executed successfully`。
+
+### 7.6 验收清单
+
+1. 构建通过 `./gradlew assembleDebug`，无 lint/编译错误。
+2. 截图触发后 10s 内脚本执行且无主线程阻塞。
+3. JS 能访问 `img/files/shell` API，出现异常会写入 `Logcat` 中的 `Script execution failed`。
+4. 删除脚本或路径不存在时，`EngineManager` 抛出可读异常并被 UI 捕获，不导致应用崩溃。
+
+### 7.7 后续扩展挂钩
+
+- Phase 3 开发 `http/ui/clipboard` 时，直接在 `EngineManager` 注入新的模块实例即可，无需修改调用方。
+- 需要持久脚本管理 UI 时，可通过 `ScriptStorage.save` 与现有目录结构重用。

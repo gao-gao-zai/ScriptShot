@@ -1,12 +1,13 @@
 package com.scriptshot.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.widget.Toast;
-import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,13 +21,18 @@ import com.scriptshot.core.root.RootUtils;
 import com.scriptshot.core.screenshot.ScreenshotAction;
 import com.scriptshot.core.screenshot.ScreenshotActionFactory;
 import com.scriptshot.core.screenshot.ScreenshotContentObserver;
+import com.scriptshot.script.EngineManager;
+import com.scriptshot.script.ScriptExecutionCallback;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ShotTriggerActivity extends AppCompatActivity {
     private static final String TAG = "ShotTrigger";
     private static final long DEBOUNCE_MS = 800L;
     private static final long TIMEOUT_MS = 10_000L;
+    private static final String DEFAULT_SCRIPT_NAME = "Default.js";
     private static final AtomicLong LAST_TRIGGER_MS = new AtomicLong(0L);
 
     private HandlerThread observerThread;
@@ -125,7 +131,41 @@ public class ShotTriggerActivity extends AppCompatActivity {
             getString(R.string.screenshot_captured_toast, file.displayName),
             Toast.LENGTH_SHORT
         ).show();
+        runAutomationScript(file);
         finishFlow();
+    }
+
+    private void runAutomationScript(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
+        EngineManager engine = EngineManager.getInstance(this);
+        Map<String, Object> bindings = new HashMap<>();
+        String absolutePath = file.absolutePath;
+        if (!TextUtils.isEmpty(absolutePath)) {
+            bindings.put("screenshotPath", absolutePath);
+        } else {
+            bindings.put("screenshotPath", file.contentUri.toString());
+        }
+        bindings.put("screenshotMeta", createMetadataMap(file));
+
+        engine.executeByName(DEFAULT_SCRIPT_NAME, bindings, new ScriptExecutionCallback() {
+            @Override
+            public void onSuccess() {
+                mainHandler.post(() -> Log.i(TAG, "Script executed successfully"));
+            }
+
+            @Override
+            public void onError(Exception error) {
+                mainHandler.post(() -> Log.e(TAG, "Script execution failed", error));
+            }
+        });
+    }
+
+    private Map<String, Object> createMetadataMap(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("displayName", file.displayName);
+        map.put("sizeBytes", file.sizeBytes);
+        map.put("contentUri", file.contentUri.toString());
+        map.put("path", file.absolutePath);
+        return map;
     }
 
     private void handleTimeout() {

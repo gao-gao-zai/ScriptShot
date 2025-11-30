@@ -20,10 +20,25 @@
     <string name="config_button_create_shortcut">Create capture shortcut</string>
     <string name="config_button_test_capture">Test capture now</string>
     <string name="config_button_refresh_status">Refresh status</string>
+    <string name="config_button_manage_scripts">Manage scripts</string>
     <string name="shortcut_label_capture">ScriptShot Capture</string>
     <string name="shortcut_created_toast">Shortcut request sent</string>
     <string name="shortcut_not_supported_toast">Your launcher does not allow pinned shortcuts.</string>
     <string name="config_mode_saved_toast">Mode updated</string>
     <string name="config_permission_prompt">Granting this permission allows ScriptShot to read the latest screenshots.</string>
     <string name="root_required_toast">Root access is required for this mode.</string>
+    <string name="script_manager_title">Script manager</string>
+    <string name="script_list_label">Available scripts</string>
+    <string name="script_list_empty">No scripts yet. Save one to get started.</string>
+    <string name="script_editor_label">Script editor</string>
+    <string name="script_name_hint">Script name (e.g. Default.js)</string>
+    <string name="script_new_button">New script</string>
+    <string name="script_save_button">Save script</string>
+    <string name="script_editor_placeholder">Write your Rhino automation code here.</string>
+    <string name="script_error_name_required">Enter a script name.</string>
+    <string name="script_error_invalid_name">Name cannot include slashes.</string>
+    <string name="script_toast_load_error">Unable to load script.</string>
+    <string name="script_toast_save_error">Unable to save script.</string>
+    <string name="script_toast_save_success">Script saved.</string>
+    <string name="script_toast_loaded">Loaded %1$s.</string>
 </resources>
