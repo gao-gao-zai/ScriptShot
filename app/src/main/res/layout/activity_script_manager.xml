@@ -1,143 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:fillViewport="true"
     android:padding="16dp">
-
-    <TextView
-        android:id="@+id/text_script_manager_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/script_manager_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-    <TextView
-        android:id="@+id/text_default_script_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/script_manager_default_hint"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-    <TextView
-        android:id="@+id/text_current_default_script"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/script_default_label"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-    <TextView
-        android:id="@+id/text_scripts_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/script_list_label"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1">
-
-        <ListView
-            android:id="@+id/list_scripts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:choiceMode="singleChoice"
-            android:divider="@android:color/darker_gray"
-            android:dividerHeight="0.5dp"
-            android:listSelector="?android:attr/activatedBackgroundIndicator" />
-
-        <TextView
-            android:id="@+id/text_empty_scripts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="@string/script_list_empty"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:visibility="gone" />
-
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/text_editor_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/script_editor_label"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <EditText
-        android:id="@+id/input_script_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:hint="@string/script_name_hint"
-        android:inputType="textVisiblePassword" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_script_manager_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/script_manager_title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+        <TextView
+            android:id="@+id/text_default_script_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/script_manager_default_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <TextView
+            android:id="@+id/text_current_default_script"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/script_default_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <TextView
+            android:id="@+id/text_scripts_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/script_list_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/script_list_panel_height"
+            android:layout_marginTop="8dp">
+
+            <ListView
+                android:id="@+id/list_scripts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/darker_gray"
+                android:dividerHeight="0.5dp"
+                android:listSelector="?android:attr/activatedBackgroundIndicator"
+                android:overScrollMode="ifContentScrolls" />
+
+            <TextView
+                android:id="@+id/text_empty_scripts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/script_list_empty"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/text_editor_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/script_editor_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <EditText
+            android:id="@+id/input_script_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="@string/script_name_hint"
+            android:inputType="textVisiblePassword" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_new_script"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/script_new_button" />
+
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/button_save_script"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/script_save_button" />
+
+        </LinearLayout>
 
         <Button
-            android:id="@+id/button_new_script"
-            android:layout_width="0dp"
+            android:id="@+id/button_set_default_script"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/script_new_button" />
-
-        <Space
-            android:layout_width="12dp"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp"
+            android:text="@string/script_set_default_button" />
 
         <Button
-            android:id="@+id/button_save_script"
-            android:layout_width="0dp"
+            android:id="@+id/button_delete_script"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/script_save_button" />
+            android:layout_marginTop="8dp"
+            android:text="@string/script_delete_button" />
+
+        <Button
+            android:id="@+id/button_create_shortcut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/script_create_shortcut_button" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_script_wrap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/script_wrap_toggle_label" />
+
+        <EditText
+            android:id="@+id/input_script_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="top|start"
+            android:hint="@string/script_editor_placeholder"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:minLines="12"
+            android:overScrollMode="always"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="insideOverlay"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/button_set_default_script"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/script_set_default_button" />
-
-    <Button
-        android:id="@+id/button_delete_script"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/script_delete_button" />
-
-    <Button
-        android:id="@+id/button_create_shortcut"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/script_create_shortcut_button" />
-
-    <EditText
-        android:id="@+id/input_script_content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1"
-        android:gravity="top|start"
-        android:hint="@string/script_editor_placeholder"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:minLines="8"
-        android:overScrollMode="always"
-        android:scrollbarStyle="insideOverlay"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

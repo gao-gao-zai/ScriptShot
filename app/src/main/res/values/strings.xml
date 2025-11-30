@@ -58,6 +58,7 @@
     <string name="script_toast_shortcut_error">Unable to create shortcut.</string>
     <string name="config_manage_scripts_hint">Automation runs right after each screenshot. Use "Manage scripts" to edit built-ins like "&#x65cb;&#x8f6c;&#x622a;&#x5c4f;.js" or create your own.</string>
     <string name="config_default_script_label">Current default script: %1$s</string>
+        <string name="script_wrap_toggle_label">脚本编辑器自动换行</string>
     <string name="config_qs_hint">Add the ScriptShot quick settings tile from the notification shade to trigger silent captures.</string>
     <string name="config_default_script_disabled">Script automation is currently disabled.</string>
     <string name="config_scripts_enabled_label">Enable script automation</string>

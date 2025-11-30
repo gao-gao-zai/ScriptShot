@@ -32,7 +32,8 @@
         <activity
             android:name="com.scriptshot.ui.ScriptManagerActivity"
             android:exported="false"
-            android:label="@string/script_manager_title" />
+            android:label="@string/script_manager_title"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
             android:name="com.scriptshot.ui.ShotTriggerActivity"

@@ -1,7 +1,11 @@
 package com.scriptshot.ui;
 
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -11,13 +15,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import com.scriptshot.R;
 import com.scriptshot.core.preferences.CapturePreferences;
 import com.scriptshot.core.shortcut.ShortcutHelper;
 import com.scriptshot.script.storage.ScriptStorage;
+import com.scriptshot.ui.editor.JsSyntaxHighlighter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +35,8 @@ import java.util.Locale;
  */
 public class ScriptManagerActivity extends AppCompatActivity {
 
+    private static final String PREFS_NAME = "script_manager";
+    private static final String PREF_WRAP_ENABLED = "wrap_enabled";
     private static final String DEFAULT_TEMPLATE = """
             // ScriptShot template
             log("Script started");
@@ -57,7 +65,9 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private Button setDefaultButton;
     private Button deleteButton;
     private Button createShortcutButton;
+    private SwitchCompat wrapSwitch;
     private String activeScriptName;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,9 +75,11 @@ public class ScriptManagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_script_manager);
         setTitle(R.string.script_manager_title);
         scriptStorage = new ScriptStorage(this);
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         bindViews();
         setupList();
         setupButtons();
+        setupWrapToggle();
         loadScripts();
     }
 
@@ -86,6 +98,8 @@ public class ScriptManagerActivity extends AppCompatActivity {
         setDefaultButton = findViewById(R.id.button_set_default_script);
         deleteButton = findViewById(R.id.button_delete_script);
         createShortcutButton = findViewById(R.id.button_create_shortcut);
+        wrapSwitch = findViewById(R.id.switch_script_wrap);
+        enhanceScriptEditor();
     }
 
     private void setupList() {
@@ -100,6 +114,17 @@ public class ScriptManagerActivity extends AppCompatActivity {
         scriptsListView.setOnItemClickListener((parent, view, position, id) -> {
             String scriptName = scriptNames.get(position);
             loadScript(scriptName);
+        });
+        scriptsListView.setNestedScrollingEnabled(true);
+        scriptsListView.setOnTouchListener((v, event) -> {
+            if (v.getParent() != null) {
+                if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
+                } else {
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                }
+            }
+            return false;
         });
     }
 
@@ -172,6 +197,37 @@ public class ScriptManagerActivity extends AppCompatActivity {
         updateSetDefaultState();
         updateDeleteState();
         updateShortcutState();
+    }
+
+    private void enhanceScriptEditor() {
+        scriptContentInput.setTypeface(Typeface.MONOSPACE);
+        scriptContentInput.setHorizontallyScrolling(true);
+        scriptContentInput.setHorizontalScrollBarEnabled(true);
+        scriptContentInput.setVerticalScrollBarEnabled(true);
+        scriptContentInput.setMovementMethod(ScrollingMovementMethod.getInstance());
+        JsSyntaxHighlighter.attach(scriptContentInput);
+    }
+
+    private void setupWrapToggle() {
+        if (wrapSwitch == null) {
+            return;
+        }
+        boolean wrapEnabled = prefs.getBoolean(PREF_WRAP_ENABLED, false);
+        wrapSwitch.setChecked(wrapEnabled);
+        applyWrapState(wrapEnabled);
+        wrapSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            prefs.edit().putBoolean(PREF_WRAP_ENABLED, isChecked).apply();
+            applyWrapState(isChecked);
+        });
+    }
+
+    private void applyWrapState(boolean wrapEnabled) {
+        if (scriptContentInput == null) {
+            return;
+        }
+        scriptContentInput.setHorizontallyScrolling(!wrapEnabled);
+        scriptContentInput.setHorizontalScrollBarEnabled(!wrapEnabled);
+        scriptContentInput.setMovementMethod(ScrollingMovementMethod.getInstance());
     }
 
     private void scriptListClearSelection() {

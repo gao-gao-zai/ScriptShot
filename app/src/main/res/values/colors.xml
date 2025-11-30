@@ -18,4 +18,8 @@
     <color name="md_theme_outline">#79747E</color>
     <color name="md_theme_error">#B3261E</color>
     <color name="md_theme_onError">#FFFFFF</color>
+
+    <color name="script_highlight_keyword">#FF6F00</color>
+    <color name="script_highlight_string">#00796B</color>
+    <color name="script_highlight_comment">#5F6368</color>
 </resources>
