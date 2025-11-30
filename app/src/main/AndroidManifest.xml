@@ -25,6 +25,11 @@
         </activity>
 
         <activity
+            android:name="com.scriptshot.ui.HelpActivity"
+            android:exported="false"
+            android:label="@string/help_title" />
+
+        <activity
             android:name="com.scriptshot.ui.ScriptManagerActivity"
             android:exported="false"
             android:label="@string/script_manager_title" />

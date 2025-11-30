@@ -79,6 +79,7 @@ public class ConfigActivity extends AppCompatActivity {
         Button testCapture = findViewById(R.id.button_test_capture);
         Button refresh = findViewById(R.id.button_refresh);
         Button manageScripts = findViewById(R.id.button_manage_scripts);
+        Button help = findViewById(R.id.button_help);
 
         requestPermission.setOnClickListener(v -> {
             if (PermissionManager.hasMediaReadPermission(this)) {
@@ -112,6 +113,11 @@ public class ConfigActivity extends AppCompatActivity {
 
         manageScripts.setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(this, ScriptManagerActivity.class);
+            startActivity(intent);
+        });
+
+        help.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, HelpActivity.class);
             startActivity(intent);
         });
     }
