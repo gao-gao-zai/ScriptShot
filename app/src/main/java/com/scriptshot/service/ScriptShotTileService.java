@@ -15,7 +15,14 @@ public class ScriptShotTileService extends TileService {
     public void onClick() {
         super.onClick();
         String defaultScript = CapturePreferences.getDefaultScriptName(this);
-        Intent intent = TriggerContract.buildRunIntent(this, defaultScript, true, false, false);
+        Intent intent = TriggerContract.buildRunIntent(
+            this,
+            defaultScript,
+            true,
+            false,
+            false,
+            TriggerContract.ORIGIN_QS_TILE
+        );
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityAndCollapse(intent);
     }

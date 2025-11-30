@@ -1,162 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="24dp">
+        android:background="?attr/colorSurface"
+        android:elevation="0dp"
+        android:paddingHorizontal="16dp"
+        app:title="@string/config_title"
+        app:titleCentered="false" />
 
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/config_title"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/config_capture_mode_label"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <RadioGroup
-            android:id="@+id/radio_group_mode"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="32dp"
+            android:paddingHorizontal="16dp">
 
-            <RadioButton
-                android:id="@+id/radio_mode_root"
-                android:layout_width="wrap_content"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_capture_mode"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/config_mode_root" />
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-            <RadioButton
-                android:id="@+id/radio_mode_accessibility"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_capture_mode_label"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                    <RadioGroup
+                        android:id="@+id/radio_group_mode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp">
+
+                        <RadioButton
+                            android:id="@+id/radio_mode_root"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
+                            android:text="@string/config_mode_root" />
+
+                        <RadioButton
+                            android:id="@+id/radio_mode_accessibility"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/config_mode_accessibility" />
+                    </RadioGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_status"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/config_mode_accessibility" />
-        </RadioGroup>
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-        <TextView
-            android:id="@+id/text_storage_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/config_status_storage"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-        <TextView
-            android:id="@+id/text_accessibility_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_status_accessibility"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_section_status"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <TextView
-            android:id="@+id/text_root_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_status_root"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                    <TextView
+                        android:id="@+id/text_storage_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/config_status_storage"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-        <TextView
-            android:id="@+id/text_default_script_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_default_script_label"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                    <TextView
+                        android:id="@+id/text_accessibility_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_status_accessibility"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switch_scripts_enabled"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/config_scripts_enabled_label" />
+                    <TextView
+                        android:id="@+id/text_root_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_status_root"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switch_capture_toast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_capture_toast_label" />
+                    <TextView
+                        android:id="@+id/text_default_script_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_default_script_label"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switch_script_success_toast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/config_script_success_toast_label" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_automation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switch_script_error_toast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/config_script_error_toast_label" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-        <Button
-            android:id="@+id/button_refresh"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/config_button_refresh_status" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_section_automation"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <Button
-            android:id="@+id/button_request_permission"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/config_button_request_permission" />
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_scripts_enabled"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/config_scripts_enabled_label" />
 
-        <Button
-            android:id="@+id/button_open_accessibility"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/config_button_open_accessibility" />
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_capture_toast"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_capture_toast_label" />
 
-        <Button
-            android:id="@+id/button_create_shortcut"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_button_create_shortcut" />
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_script_success_toast"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_script_success_toast_label" />
 
-        <Button
-            android:id="@+id/button_test_capture"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_button_test_capture" />
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_script_error_toast"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_script_error_toast_label" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/button_manage_scripts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_button_manage_scripts" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-        <TextView
-            android:id="@+id/text_manage_scripts_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/config_manage_scripts_hint"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-        <TextView
-            android:id="@+id/text_qs_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/config_qs_hint"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_section_actions"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-    </LinearLayout>
-</ScrollView>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_refresh"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/config_button_refresh_status" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_request_permission"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/config_button_request_permission" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_open_accessibility"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_button_open_accessibility" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_create_shortcut"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_button_create_shortcut" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_test_capture"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_button_test_capture" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_manage_scripts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_button_manage_scripts" />
+
+                    <TextView
+                        android:id="@+id/text_manage_scripts_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/config_manage_scripts_hint"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+                    <TextView
+                        android:id="@+id/text_qs_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/config_qs_hint"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

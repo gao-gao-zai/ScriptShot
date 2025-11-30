@@ -45,7 +45,14 @@ public final class ShortcutHelper {
     private static Intent createCaptureIntent(Context context) {
         // 使用当前默认脚本与主界面保持一致
         String defaultScript = com.scriptshot.core.preferences.CapturePreferences.getDefaultScriptName(context);
-        return TriggerContract.buildRunIntent(context, defaultScript, true, false, false);
+        return TriggerContract.buildRunIntent(
+            context,
+            defaultScript,
+            true,
+            false,
+            false,
+            TriggerContract.ORIGIN_SHORTCUT_CAPTURE
+        );
     }
 
     public static boolean requestScriptShortcut(Context context, String scriptName) {
@@ -73,7 +80,14 @@ public final class ShortcutHelper {
     }
 
     private static Intent createScriptIntent(Context context, String scriptName) {
-        return TriggerContract.buildRunIntent(context, scriptName, true, false, false);
+        return TriggerContract.buildRunIntent(
+            context,
+            scriptName,
+            true,
+            false,
+            false,
+            TriggerContract.ORIGIN_SHORTCUT_SCRIPT
+        );
     }
 
     private static String buildScriptShortcutId(String scriptName) {

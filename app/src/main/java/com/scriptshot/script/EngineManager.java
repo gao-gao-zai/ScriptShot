@@ -5,8 +5,10 @@ import android.util.Log;
 
 import com.scriptshot.script.api.FilesApi;
 import com.scriptshot.script.api.ImgApi;
+import com.scriptshot.script.api.NotificationApi;
 import com.scriptshot.script.api.ShareApi;
 import com.scriptshot.script.api.ShellApi;
+import com.scriptshot.script.api.UiApi;
 import com.scriptshot.script.storage.ScriptStorage;
 
 import org.mozilla.javascript.BaseFunction;
@@ -41,6 +43,8 @@ public final class EngineManager {
     private final FilesApi filesApi;
     private final ShellApi shellApi;
     private final ShareApi shareApi;
+    private final NotificationApi notificationApi;
+    private final UiApi uiApi;
     private final ScriptStorage scriptStorage;
     private final Object logFileLock = new Object();
     private final SimpleDateFormat logTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", java.util.Locale.US);
@@ -52,6 +56,8 @@ public final class EngineManager {
         this.filesApi = new FilesApi(appContext);
         this.shellApi = new ShellApi();
         this.shareApi = new ShareApi(appContext);
+        this.notificationApi = new NotificationApi(appContext);
+        this.uiApi = new UiApi(appContext, notificationApi);
         this.scriptStorage = new ScriptStorage(appContext);
     }
 
@@ -105,6 +111,8 @@ public final class EngineManager {
             ScriptableObject.putProperty(scope, "files", org.mozilla.javascript.Context.javaToJS(filesApi, scope));
             ScriptableObject.putProperty(scope, "shell", org.mozilla.javascript.Context.javaToJS(shellApi, scope));
             ScriptableObject.putProperty(scope, "share", org.mozilla.javascript.Context.javaToJS(shareApi, scope));
+            ScriptableObject.putProperty(scope, "notifications", org.mozilla.javascript.Context.javaToJS(notificationApi, scope));
+            ScriptableObject.putProperty(scope, "ui", org.mozilla.javascript.Context.javaToJS(uiApi, scope));
             LoggerFunction logger = new LoggerFunction();
             logger.setParentScope(scope);
             ScriptableObject.putProperty(scope, "log", logger);

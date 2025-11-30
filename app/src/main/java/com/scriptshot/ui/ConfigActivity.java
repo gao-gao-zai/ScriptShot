@@ -18,6 +18,7 @@ import com.scriptshot.core.preferences.CapturePreferences;
 import com.scriptshot.core.preferences.CapturePreferences.CaptureMode;
 import com.scriptshot.core.root.RootUtils;
 import com.scriptshot.core.shortcut.ShortcutHelper;
+import com.scriptshot.core.trigger.TriggerContract;
 
 public class ConfigActivity extends AppCompatActivity {
 
@@ -96,8 +97,14 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         testCapture.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, ShotTriggerActivity.class);
-            intent.setAction("com.scriptshot.action.CAPTURE");
+            android.content.Intent intent = TriggerContract.buildRunIntent(
+                this,
+                null,
+                false,
+                false,
+                false,
+                TriggerContract.ORIGIN_CONFIG_TEST
+            );
             startActivity(intent);
         });
 

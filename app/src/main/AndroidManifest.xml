@@ -44,6 +44,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.scriptshot.ui.prompt.PromptActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ScriptShot.Dialog" />
+
         <service
             android:name="com.scriptshot.service.ScreenshotAccessibilityService"
             android:enabled="true"

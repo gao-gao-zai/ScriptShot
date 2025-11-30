@@ -64,8 +64,13 @@
     <string name="config_capture_toast_label">Show screenshot captured toast</string>
     <string name="config_script_success_toast_label">Show script success toast</string>
     <string name="config_script_error_toast_label">Show script failure toast</string>
+    <string name="config_section_status">System status</string>
+    <string name="config_section_automation">Automation &amp; feedback</string>
+    <string name="config_section_actions">Quick actions</string>
     <string name="script_execution_disabled_toast">Automation skipped (disabled).</string>
     <string name="script_success_toast">Automation finished: %1$s</string>
     <string name="script_error_toast">Automation failed: %1$s</string>
     <string name="share_chooser_title">Share screenshot via</string>
+    <string name="prompt_cancel">Cancel</string>
+    <string name="prompt_confirm">OK</string>
 </resources>

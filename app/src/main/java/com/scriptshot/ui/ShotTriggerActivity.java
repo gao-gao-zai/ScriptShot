@@ -26,7 +26,10 @@ import com.scriptshot.script.EngineManager;
 import com.scriptshot.script.ScriptExecutionCallback;
 import com.scriptshot.script.storage.ScriptStorage;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,6 +48,7 @@ public class ShotTriggerActivity extends AppCompatActivity {
     private boolean suppressFeedback;
     private boolean skipCapture;
     private String overrideScriptName;
+    private String triggerOrigin;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,9 +91,11 @@ public class ShotTriggerActivity extends AppCompatActivity {
         suppressFeedback = false;
         skipCapture = false;
         overrideScriptName = null;
+        triggerOrigin = TriggerContract.ORIGIN_UNKNOWN;
         if (intent == null) {
             return;
         }
+        String explicitOrigin = intent.getStringExtra(TriggerContract.EXTRA_ORIGIN);
         if (TriggerContract.ACTION_RUN_SCRIPT.equals(intent.getAction())) {
             overrideScriptName = intent.getStringExtra(TriggerContract.EXTRA_SCRIPT_NAME);
             silentMode = intent.getBooleanExtra(TriggerContract.EXTRA_SILENT, false);
@@ -99,6 +105,15 @@ public class ShotTriggerActivity extends AppCompatActivity {
                 suppressFeedback = false;
             }
             skipCapture = intent.getBooleanExtra(TriggerContract.EXTRA_SKIP_CAPTURE, false);
+            if (!TextUtils.isEmpty(explicitOrigin)) {
+                triggerOrigin = explicitOrigin;
+            } else {
+                triggerOrigin = TriggerContract.ORIGIN_THIRD_PARTY;
+            }
+        } else if ("com.scriptshot.action.CAPTURE".equals(intent.getAction())) {
+            triggerOrigin = TextUtils.isEmpty(explicitOrigin) ? TriggerContract.ORIGIN_APP : explicitOrigin;
+        } else if (!TextUtils.isEmpty(explicitOrigin)) {
+            triggerOrigin = explicitOrigin;
         }
     }
 
@@ -224,6 +239,7 @@ public class ShotTriggerActivity extends AppCompatActivity {
         }
 
         final String chosenScript = scriptName;
+        bindings.put("env", buildEnvMap(chosenScript));
         engine.executeByName(scriptName, bindings, new ScriptExecutionCallback() {
             @Override
             public void onSuccess() {
@@ -262,6 +278,79 @@ public class ShotTriggerActivity extends AppCompatActivity {
         map.put("contentUri", file.contentUri.toString());
         map.put("path", file.absolutePath);
         return map;
+    }
+
+    private Map<String, Object> buildEnvMap(@NonNull String scriptName) {
+        Map<String, Object> env = new HashMap<>();
+        env.put("source", triggerOrigin == null ? TriggerContract.ORIGIN_UNKNOWN : triggerOrigin);
+        env.put("silent", silentMode);
+        env.put("suppressFeedback", suppressFeedback);
+        env.put("skipCapture", skipCapture);
+        env.put("scriptName", scriptName);
+        if (!TextUtils.isEmpty(overrideScriptName)) {
+            env.put("requestedScriptName", overrideScriptName);
+        }
+        env.put("timestamp", System.currentTimeMillis());
+        Intent currentIntent = getIntent();
+        if (currentIntent != null && currentIntent.getAction() != null) {
+            env.put("action", currentIntent.getAction());
+        }
+        env.put("extras", collectIntentExtras(currentIntent));
+        return env;
+    }
+
+    private Map<String, Object> collectIntentExtras(@Nullable Intent intent) {
+        if (intent == null) {
+            return Collections.emptyMap();
+        }
+        Bundle extras = intent.getExtras();
+        if (extras == null || extras.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> map = new HashMap<>();
+        for (String key : extras.keySet()) {
+            Object value = coerceExtraValue(extras.get(key));
+            if (value != null) {
+                map.put(key, value);
+            }
+        }
+        return map;
+    }
+
+    @Nullable
+    private Object coerceExtraValue(@Nullable Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String || value instanceof Boolean || value instanceof Integer || value instanceof Long || value instanceof Double) {
+            return value;
+        }
+        if (value instanceof Float) {
+            return ((Float) value).doubleValue();
+        }
+        if (value instanceof String[]) {
+            String[] array = (String[]) value;
+            List<String> list = new ArrayList<>(array.length);
+            Collections.addAll(list, array);
+            return list;
+        }
+        if (value instanceof int[]) {
+            int[] array = (int[]) value;
+            List<Integer> list = new ArrayList<>(array.length);
+            for (int v : array) {
+                list.add(v);
+            }
+            return list;
+        }
+        if (value instanceof ArrayList) {
+            ArrayList<?> arrayList = (ArrayList<?>) value;
+            List<String> list = new ArrayList<>(arrayList.size());
+            for (Object element : arrayList) {
+                list.add(element == null ? "" : String.valueOf(element));
+            }
+            return list;
+        }
+        return null;
     }
 
     private void handleTimeout() {
