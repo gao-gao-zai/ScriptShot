@@ -13,9 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 public final class ImgApi {
 
     private final Context appContext;
@@ -24,7 +21,7 @@ public final class ImgApi {
         this.appContext = context.getApplicationContext();
     }
 
-    public Map<String, Object> load(String path) throws IOException {
+    public ImageInfo load(String path) throws IOException {
         File source = resolveFile(path);
         if (!source.exists()) {
             throw new IOException("Image not found: " + path);
@@ -34,12 +31,12 @@ public final class ImgApi {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(source.getAbsolutePath(), options);
 
-        Map<String, Object> info = new HashMap<>();
-        info.put("width", options.outWidth);
-        info.put("height", options.outHeight);
-        info.put("size", source.length());
-        info.put("mime", options.outMimeType);
-        return info;
+        return new ImageInfo(
+            options.outWidth,
+            options.outHeight,
+            source.length(),
+            options.outMimeType
+        );
     }
 
     public String toBase64(String path) throws IOException {
@@ -103,5 +100,22 @@ public final class ImgApi {
             return file;
         }
         return new File(appContext.getFilesDir(), path);
+    }
+
+    /**
+     * Value object describing the dimensions and metadata of an image.
+     */
+    public static final class ImageInfo {
+        public final int width;
+        public final int height;
+        public final long bytes;
+        public final String mime;
+
+        ImageInfo(int width, int height, long bytes, String mime) {
+            this.width = width;
+            this.height = height;
+            this.bytes = bytes;
+            this.mime = mime;
+        }
     }
 }

@@ -66,6 +66,14 @@
             android:text="@string/config_status_root"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
+        <TextView
+            android:id="@+id/text_default_script_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/config_default_script_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
         <Button
             android:id="@+id/button_refresh"
             android:layout_width="match_parent"
@@ -105,6 +113,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/config_button_manage_scripts" />
+
+        <TextView
+            android:id="@+id/text_manage_scripts_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/config_manage_scripts_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
     </LinearLayout>
 </ScrollView>

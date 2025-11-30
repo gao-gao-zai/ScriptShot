@@ -20,6 +20,7 @@ import java.util.TreeSet;
 
 public final class ScriptStorage {
 
+    public static final String DEFAULT_SCRIPT_NAME = "Default.js";
     private static final String SCRIPTS_DIR = "scripts";
     private static final String SCRIPT_EXTENSION = ".js";
 
@@ -58,7 +59,22 @@ public final class ScriptStorage {
         if (names.isEmpty()) {
             return Collections.emptyList();
         }
-        return new ArrayList<>(names);
+        List<String> result = new ArrayList<>(names);
+        result.sort((a, b) -> {
+            boolean aIsDefault = DEFAULT_SCRIPT_NAME.equalsIgnoreCase(a);
+            boolean bIsDefault = DEFAULT_SCRIPT_NAME.equalsIgnoreCase(b);
+            if (aIsDefault && bIsDefault) {
+                return 0;
+            }
+            if (aIsDefault) {
+                return -1;
+            }
+            if (bIsDefault) {
+                return 1;
+            }
+            return a.compareToIgnoreCase(b);
+        });
+        return result;
     }
 
     public void save(String scriptName, String content) throws IOException {

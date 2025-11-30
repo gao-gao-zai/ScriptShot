@@ -4,9 +4,11 @@ if (typeof screenshotPath !== "undefined") {
   log("Screenshot path: " + screenshotPath);
 
   var info = img.load(screenshotPath);
-  log("Image size: " + info.width + "x" + info.height + ", bytes=" + info.size);
+  log(
+    "Image size: " + info.width + "x" + info.height + ", bytes=" + info.bytes
+  );
 
-  var base64Length = img.toBase64(screenshotPath).length;
+  var base64Length = img.toBase64(screenshotPath).length();
   log("Base64 payload length=" + base64Length);
 
   var logPath = "scripts/runtime.log";

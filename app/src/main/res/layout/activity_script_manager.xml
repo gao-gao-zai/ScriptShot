@@ -13,6 +13,22 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
     <TextView
+        android:id="@+id/text_default_script_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/script_manager_default_hint"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+    <TextView
+        android:id="@+id/text_current_default_script"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/script_default_label"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
         android:id="@+id/text_scripts_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -87,6 +103,13 @@
             android:text="@string/script_save_button" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/button_set_default_script"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/script_set_default_button" />
 
     <EditText
         android:id="@+id/input_script_content"

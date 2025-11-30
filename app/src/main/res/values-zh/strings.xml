@@ -35,10 +35,16 @@
     <string name="script_new_button">新建脚本</string>
     <string name="script_save_button">保存脚本</string>
     <string name="script_editor_placeholder">在此编写你的 Rhino 自动化代码。</string>
+    <string name="script_manager_default_hint">每次截屏都会自动执行 Default.js，你可以编辑它或保存新脚本并命名为 Default.js 以覆盖默认行为。</string>
+    <string name="script_default_label">当前默认脚本：%1$s</string>
+    <string name="script_set_default_button">设为默认脚本</string>
     <string name="script_error_name_required">请输入脚本名称。</string>
     <string name="script_error_invalid_name">名称中不能包含斜杠。</string>
     <string name="script_toast_load_error">无法加载脚本。</string>
     <string name="script_toast_save_error">无法保存脚本。</string>
     <string name="script_toast_save_success">脚本已保存。</string>
     <string name="script_toast_loaded">已加载 %1$s。</string>
+    <string name="script_toast_set_default">%1$s 已设为默认脚本。</string>
+    <string name="config_manage_scripts_hint">每次截图完成后都会运行 Default.js，可通过“管理脚本”编辑或替换它。</string>
+    <string name="config_default_script_label">当前默认脚本：%1$s</string>
 </resources>

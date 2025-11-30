@@ -13,7 +13,13 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +40,8 @@ public final class EngineManager {
     private final FilesApi filesApi;
     private final ShellApi shellApi;
     private final ScriptStorage scriptStorage;
+    private final Object logFileLock = new Object();
+    private final SimpleDateFormat logTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", java.util.Locale.US);
 
     private EngineManager(Context context) {
         this.appContext = context.getApplicationContext();
@@ -93,7 +101,9 @@ public final class EngineManager {
             ScriptableObject.putProperty(scope, "img", org.mozilla.javascript.Context.javaToJS(imgApi, scope));
             ScriptableObject.putProperty(scope, "files", org.mozilla.javascript.Context.javaToJS(filesApi, scope));
             ScriptableObject.putProperty(scope, "shell", org.mozilla.javascript.Context.javaToJS(shellApi, scope));
-            ScriptableObject.putProperty(scope, "log", new LoggerFunction());
+            LoggerFunction logger = new LoggerFunction();
+            logger.setParentScope(scope);
+            ScriptableObject.putProperty(scope, "log", logger);
 
             Map<String, Object> safeBindings = bindings == null ? Collections.emptyMap() : bindings;
             for (Map.Entry<String, Object> entry : safeBindings.entrySet()) {
@@ -114,6 +124,7 @@ public final class EngineManager {
 
     private void notifyError(ScriptExecutionCallback callback, Exception error) {
         Log.e(TAG, "Script execution failed", error);
+        appendEngineLog("ERROR " + error.getClass().getSimpleName() + ": " + error.getMessage());
         if (callback != null) {
             callback.onError(error);
         }
@@ -133,11 +144,30 @@ public final class EngineManager {
         }
     }
 
-    private static final class LoggerFunction extends BaseFunction {
+    private void appendEngineLog(String line) {
+        String timestamped = logTimestamp.format(new Date()) + " " + line + "\n";
+        File scriptsDir = new File(appContext.getFilesDir(), "scripts");
+        if (!scriptsDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            scriptsDir.mkdirs();
+        }
+        File logFile = new File(scriptsDir, "engine.log");
+        synchronized (logFileLock) {
+            try (FileOutputStream outputStream = new FileOutputStream(logFile, true)) {
+                outputStream.write(timestamped.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to append engine log", e);
+            }
+        }
+    }
+
+    private final class LoggerFunction extends BaseFunction {
         @Override
         public Object call(org.mozilla.javascript.Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
             if (args != null && args.length > 0) {
-                Log.d(TAG, String.valueOf(args[0]));
+                String message = String.valueOf(args[0]);
+                Log.d(TAG, message);
+                appendEngineLog("LOG " + message);
             }
             return null;
         }

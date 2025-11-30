@@ -24,6 +24,7 @@ public class ConfigActivity extends AppCompatActivity {
     private TextView storageStatus;
     private TextView accessibilityStatus;
     private TextView rootStatus;
+    private TextView defaultScriptStatus;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class ConfigActivity extends AppCompatActivity {
         storageStatus = findViewById(R.id.text_storage_status);
         accessibilityStatus = findViewById(R.id.text_accessibility_status);
         rootStatus = findViewById(R.id.text_root_status);
+        defaultScriptStatus = findViewById(R.id.text_default_script_status);
     }
 
     private void setupModeSelector() {
@@ -111,6 +113,9 @@ public class ConfigActivity extends AppCompatActivity {
             ? getString(R.string.config_status_ok)
             : getString(R.string.config_status_missing);
         rootStatus.setText(getString(R.string.config_status_root, rootState));
+
+        String defaultScript = CapturePreferences.getDefaultScriptName(this);
+        defaultScriptStatus.setText(getString(R.string.config_default_script_label, defaultScript));
     }
 
     @Override

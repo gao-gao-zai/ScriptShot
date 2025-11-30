@@ -35,10 +35,16 @@
     <string name="script_new_button">New script</string>
     <string name="script_save_button">Save script</string>
     <string name="script_editor_placeholder">Write your Rhino automation code here.</string>
+    <string name="script_manager_default_hint">Default.js runs automatically after every capture. Edit it or save a new script with the same name to change what happens when you screenshot.</string>
+    <string name="script_default_label">Current default script: %1$s</string>
+    <string name="script_set_default_button">Set as default</string>
     <string name="script_error_name_required">Enter a script name.</string>
     <string name="script_error_invalid_name">Name cannot include slashes.</string>
     <string name="script_toast_load_error">Unable to load script.</string>
     <string name="script_toast_save_error">Unable to save script.</string>
     <string name="script_toast_save_success">Script saved.</string>
     <string name="script_toast_loaded">Loaded %1$s.</string>
+    <string name="script_toast_set_default">%1$s is now the default script.</string>
+    <string name="config_manage_scripts_hint">Default.js executes after each screenshot. Use “Manage scripts” to edit or replace it.</string>
+    <string name="config_default_script_label">Current default script: %1$s</string>
 </resources>

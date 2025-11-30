@@ -3,6 +3,8 @@ package com.scriptshot.core.preferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.scriptshot.script.storage.ScriptStorage;
+
 public final class CapturePreferences {
     public enum CaptureMode {
         ROOT,
@@ -11,6 +13,7 @@ public final class CapturePreferences {
 
     private static final String PREFS_NAME = "scriptshot_prefs";
     private static final String KEY_CAPTURE_MODE = "capture_mode";
+    private static final String KEY_DEFAULT_SCRIPT = "default_script";
 
     private CapturePreferences() {
     }
@@ -31,6 +34,21 @@ public final class CapturePreferences {
 
     public static boolean prefersRoot(Context context) {
         return getCaptureMode(context) == CaptureMode.ROOT;
+    }
+
+    public static String getDefaultScriptName(Context context) {
+        String stored = prefs(context).getString(KEY_DEFAULT_SCRIPT, ScriptStorage.DEFAULT_SCRIPT_NAME);
+        if (stored == null || stored.trim().isEmpty()) {
+            return ScriptStorage.DEFAULT_SCRIPT_NAME;
+        }
+        return stored;
+    }
+
+    public static void setDefaultScriptName(Context context, String scriptName) {
+        String normalized = (scriptName == null || scriptName.trim().isEmpty())
+            ? ScriptStorage.DEFAULT_SCRIPT_NAME
+            : scriptName.trim();
+        prefs(context).edit().putString(KEY_DEFAULT_SCRIPT, normalized).apply();
     }
 
     private static SharedPreferences prefs(Context context) {

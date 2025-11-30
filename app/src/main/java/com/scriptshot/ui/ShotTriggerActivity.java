@@ -23,6 +23,7 @@ import com.scriptshot.core.screenshot.ScreenshotActionFactory;
 import com.scriptshot.core.screenshot.ScreenshotContentObserver;
 import com.scriptshot.script.EngineManager;
 import com.scriptshot.script.ScriptExecutionCallback;
+import com.scriptshot.script.storage.ScriptStorage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +33,6 @@ public class ShotTriggerActivity extends AppCompatActivity {
     private static final String TAG = "ShotTrigger";
     private static final long DEBOUNCE_MS = 800L;
     private static final long TIMEOUT_MS = 10_000L;
-    private static final String DEFAULT_SCRIPT_NAME = "Default.js";
     private static final AtomicLong LAST_TRIGGER_MS = new AtomicLong(0L);
 
     private HandlerThread observerThread;
@@ -137,6 +137,10 @@ public class ShotTriggerActivity extends AppCompatActivity {
 
     private void runAutomationScript(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
         EngineManager engine = EngineManager.getInstance(this);
+        String scriptName = CapturePreferences.getDefaultScriptName(this);
+        if (TextUtils.isEmpty(scriptName)) {
+            scriptName = ScriptStorage.DEFAULT_SCRIPT_NAME;
+        }
         Map<String, Object> bindings = new HashMap<>();
         String absolutePath = file.absolutePath;
         if (!TextUtils.isEmpty(absolutePath)) {
@@ -146,15 +150,16 @@ public class ShotTriggerActivity extends AppCompatActivity {
         }
         bindings.put("screenshotMeta", createMetadataMap(file));
 
-        engine.executeByName(DEFAULT_SCRIPT_NAME, bindings, new ScriptExecutionCallback() {
+        final String chosenScript = scriptName;
+        engine.executeByName(scriptName, bindings, new ScriptExecutionCallback() {
             @Override
             public void onSuccess() {
-                mainHandler.post(() -> Log.i(TAG, "Script executed successfully"));
+                mainHandler.post(() -> Log.i(TAG, "Script executed successfully: " + chosenScript));
             }
 
             @Override
             public void onError(Exception error) {
-                mainHandler.post(() -> Log.e(TAG, "Script execution failed", error));
+                mainHandler.post(() -> Log.e(TAG, "Script execution failed for " + chosenScript, error));
             }
         });
     }

@@ -7,12 +7,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.scriptshot.R;
+import com.scriptshot.core.preferences.CapturePreferences;
 import com.scriptshot.script.storage.ScriptStorage;
 
 import java.io.IOException;
@@ -25,6 +27,23 @@ import java.util.Locale;
  */
 public class ScriptManagerActivity extends AppCompatActivity {
 
+    private static final String DEFAULT_TEMPLATE = """
+            // ScriptShot template
+            log("Script started");
+
+            if (typeof screenshotPath !== "undefined") {
+                var info = img.load(screenshotPath);
+                log("Captured " + info.width + "x" + info.height + " bytes=" + info.bytes);
+
+                var entry = new Date().toISOString() + " -> " + screenshotPath + "\n";
+                var logFile = "scripts/runtime.log";
+                var previous = files.exists(logFile) ? files.read(logFile) : "";
+                files.write(logFile, previous + entry);
+            } else {
+                log("No screenshotPath binding was provided.");
+            }
+            """;
+
     private ScriptStorage scriptStorage;
     private final List<String> scriptNames = new ArrayList<>();
     private ArrayAdapter<String> scriptsAdapter;
@@ -32,6 +51,8 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private EditText scriptNameInput;
     private EditText scriptContentInput;
     private View emptyView;
+    private TextView currentDefaultLabel;
+    private Button setDefaultButton;
     private String activeScriptName;
 
     @Override
@@ -46,11 +67,19 @@ public class ScriptManagerActivity extends AppCompatActivity {
         loadScripts();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateDefaultLabel();
+    }
+
     private void bindViews() {
         scriptsListView = findViewById(R.id.list_scripts);
         scriptNameInput = findViewById(R.id.input_script_name);
         scriptContentInput = findViewById(R.id.input_script_content);
         emptyView = findViewById(R.id.text_empty_scripts);
+        currentDefaultLabel = findViewById(R.id.text_current_default_script);
+        setDefaultButton = findViewById(R.id.button_set_default_script);
     }
 
     private void setupList() {
@@ -73,6 +102,8 @@ public class ScriptManagerActivity extends AppCompatActivity {
         Button saveButton = findViewById(R.id.button_save_script);
         newButton.setOnClickListener(v -> clearEditor());
         saveButton.setOnClickListener(v -> saveCurrentScript());
+        setDefaultButton.setOnClickListener(v -> setActiveScriptAsDefault());
+        updateSetDefaultState();
     }
 
     private void loadScripts() {
@@ -82,6 +113,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             scriptNames.addAll(names);
             scriptsAdapter.notifyDataSetChanged();
             restoreSelection();
+            updateDefaultLabel();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
         }
@@ -110,6 +142,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             scriptContentInput.setText(source);
             activeScriptName = scriptName;
             restoreSelection();
+            updateSetDefaultState();
             Toast.makeText(this, getString(R.string.script_toast_loaded, scriptName), Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
@@ -120,8 +153,9 @@ public class ScriptManagerActivity extends AppCompatActivity {
         activeScriptName = null;
         scriptListClearSelection();
         scriptNameInput.setText("");
-        scriptContentInput.setText("");
+        scriptContentInput.setText(DEFAULT_TEMPLATE);
         scriptNameInput.requestFocus();
+        updateSetDefaultState();
     }
 
     private void scriptListClearSelection() {
@@ -146,8 +180,33 @@ public class ScriptManagerActivity extends AppCompatActivity {
             activeScriptName = normalizedName;
             Toast.makeText(this, R.string.script_toast_save_success, Toast.LENGTH_SHORT).show();
             loadScripts();
+            updateSetDefaultState();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_save_error, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setActiveScriptAsDefault() {
+        if (TextUtils.isEmpty(activeScriptName)) {
+            Toast.makeText(this, R.string.script_error_name_required, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        CapturePreferences.setDefaultScriptName(this, activeScriptName);
+        updateDefaultLabel();
+        Toast.makeText(this, getString(R.string.script_toast_set_default, activeScriptName), Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateDefaultLabel() {
+        if (currentDefaultLabel == null) {
+            return;
+        }
+        String current = CapturePreferences.getDefaultScriptName(this);
+        currentDefaultLabel.setText(getString(R.string.script_default_label, current));
+    }
+
+    private void updateSetDefaultState() {
+        if (setDefaultButton != null) {
+            setDefaultButton.setEnabled(!TextUtils.isEmpty(activeScriptName));
         }
     }
 
