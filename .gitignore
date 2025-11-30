@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-[0-9]*/
+gradle-*.zip
+
+# Local configuration
+local.properties
+*.keystore
+*.jks
+
+# Android Studio
+.idea/
+.DS_Store
+*.iml
+
+# Logs and captures
+*.log
+captures/
+
+# Generated app artifacts
+app/release/
+app/debug/
+
+# Misc
+*.apk
+*.aab

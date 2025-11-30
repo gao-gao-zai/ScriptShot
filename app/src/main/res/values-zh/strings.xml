@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">截屏反转</string>
+    <string name="accessibility_service_description">ScriptShot 仅在你主动触发时请求系统截图。</string>
+    <string name="screenshot_captured_toast">已捕获：%1$s</string>
+    <string name="screenshot_timeout_toast">无法捕获截图，请重试。</string>
+    <string name="permission_required_toast">需要读取媒体权限才能监听截图。</string>
+    <string name="accessibility_required_toast">请启用 ScriptShot 无障碍服务以截取屏幕。</string>
+    <string name="config_title">截屏工作流设置</string>
+    <string name="config_capture_mode_label">选择截图方式</string>
+    <string name="config_mode_root">Root 模式</string>
+    <string name="config_mode_accessibility">无障碍模式</string>
+    <string name="config_status_storage">媒体权限：%1$s</string>
+    <string name="config_status_accessibility">无障碍服务：%1$s</string>
+    <string name="config_status_root">Root 状态：%1$s</string>
+    <string name="config_status_ok">可用</string>
+    <string name="config_status_missing">未启用</string>
+    <string name="config_button_request_permission">授予媒体权限</string>
+    <string name="config_button_open_accessibility">打开无障碍设置</string>
+    <string name="config_button_create_shortcut">创建截图快捷方式</string>
+    <string name="config_button_test_capture">立即测试截图</string>
+    <string name="config_button_refresh_status">刷新状态</string>
+    <string name="shortcut_label_capture">截屏触发器</string>
+    <string name="shortcut_created_toast">已请求创建桌面快捷方式</string>
+    <string name="shortcut_not_supported_toast">当前桌面不支持固定快捷方式</string>
+    <string name="config_mode_saved_toast">模式已更新</string>
+    <string name="config_permission_prompt">授予该权限后，ScriptShot 才能读取最新截图。</string>
+    <string name="root_required_toast">此模式需要 Root 权限。</string>
+</resources>

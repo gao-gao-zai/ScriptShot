@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScriptShot</string>
+    <string name="accessibility_service_description">ScriptShot uses this service solely to request screenshots when you explicitly trigger it.</string>
+    <string name="screenshot_captured_toast">Captured: %1$s</string>
+    <string name="screenshot_timeout_toast">Unable to capture screenshot. Please try again.</string>
+    <string name="permission_required_toast">Storage permission is required to monitor screenshots.</string>
+    <string name="accessibility_required_toast">Enable the ScriptShot accessibility service to capture screenshots.</string>
+    <string name="config_title">ScriptShot Setup</string>
+    <string name="config_capture_mode_label">Choose capture method</string>
+    <string name="config_mode_root">Root mode</string>
+    <string name="config_mode_accessibility">Accessibility mode</string>
+    <string name="config_status_storage">Media permission: %1$s</string>
+    <string name="config_status_accessibility">Accessibility service: %1$s</string>
+    <string name="config_status_root">Root availability: %1$s</string>
+    <string name="config_status_ok">Available</string>
+    <string name="config_status_missing">Missing</string>
+    <string name="config_button_request_permission">Grant media permission</string>
+    <string name="config_button_open_accessibility">Open accessibility settings</string>
+    <string name="config_button_create_shortcut">Create capture shortcut</string>
+    <string name="config_button_test_capture">Test capture now</string>
+    <string name="config_button_refresh_status">Refresh status</string>
+    <string name="shortcut_label_capture">ScriptShot Capture</string>
+    <string name="shortcut_created_toast">Shortcut request sent</string>
+    <string name="shortcut_not_supported_toast">Your launcher does not allow pinned shortcuts.</string>
+    <string name="config_mode_saved_toast">Mode updated</string>
+    <string name="config_permission_prompt">Granting this permission allows ScriptShot to read the latest screenshots.</string>
+    <string name="root_required_toast">Root access is required for this mode.</string>
+</resources>
