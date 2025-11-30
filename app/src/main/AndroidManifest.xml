@@ -30,6 +30,11 @@
             android:label="@string/help_title" />
 
         <activity
+            android:name="com.scriptshot.ui.UserGuideActivity"
+            android:exported="false"
+            android:label="@string/help_full_guide_title" />
+
+        <activity
             android:name="com.scriptshot.ui.ScriptManagerActivity"
             android:exported="false"
             android:label="@string/script_manager_title"

@@ -68,4 +68,26 @@
     <string name="script_success_toast">脚本完成：%1$s</string>
     <string name="script_error_toast">脚本失败：%1$s</string>
     <string name="share_chooser_title">分享截图到</string>
+    <string name="config_button_help">使用说明 / 帮助</string>
+    <string name="help_title">如何使用 ScriptShot</string>
+    <string name="help_getting_started_title">快速上手</string>
+    <string name="help_getting_started_body">1. 授予媒体/存储读取权限，让 ScriptShot 可以读取最新截图。
+2. 选择截屏方式：Root 模式或无障碍模式。
+3. 如果使用无障碍模式，请在系统设置里启用 ScriptShot 的无障碍服务。
+4. （可选）开启脚本自动化，在每次截屏后自动运行脚本逻辑。</string>
+    <string name="help_capture_modes_title">截屏方式说明</string>
+    <string name="help_capture_modes_body">Root 模式通过 su 执行截屏命令，在部分设备上可能更快，但需要手机已获取 Root 权限。
+无障碍模式不需要 Root，通过系统无障碍 API 请求截图，更适合普通用户使用。
+你可以随时在设置页中切换这两种模式。</string>
+    <string name="help_scripts_title">自动化脚本</string>
+    <string name="help_scripts_body">脚本是每次截屏后运行的一小段 JavaScript 代码。
+你可以在“管理脚本”页面编辑内置脚本（例如 rotate_screenshot.js、quick_share.js），或者新建自己的脚本。
+还可以设置默认脚本，并在配置页中打开或关闭自动化。</string>
+    <string name="help_troubleshooting_title">常见问题排查</string>
+    <string name="help_troubleshooting_body">如果应用似乎没有检测到截图，请先确认已授予媒体/存储权限；如果使用无障碍模式，请确认无障碍服务已开启。
+如果 Root 模式不可用，请检查设备是否正确 Root、是否存在 su，且已允许 ScriptShot 获取 Root 权限。
+若脚本执行失败，也可以通过 logcat 查看更详细的错误日志。</string>
+    <string name="help_full_guide_title">完整使用文档</string>
+    <string name="help_full_guide_body">更详细、持续更新的教程（包括脚本 API 和高级用法）请查看项目中附带的 UserGuide.md 文档，或者你部署的在线文档。</string>
+    <string name="help_open_full_guide_button">打开完整教程</string>
 </resources>

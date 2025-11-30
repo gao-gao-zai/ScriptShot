@@ -51,6 +51,14 @@
                         android:layout_marginTop="8dp"
                         android:text="@string/help_full_guide_body"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_open_full_guide"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/help_open_full_guide_button" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

@@ -95,4 +95,5 @@
 若脚本执行失败，也可以通过 logcat 查看更详细的错误日志。</string>
     <string name="help_full_guide_title">完整使用文档</string>
     <string name="help_full_guide_body">更详细、持续更新的教程（包括脚本 API 和高级用法）请查看项目中附带的 UserGuide.md 文档，或者你部署的在线文档。</string>
+    <string name="help_open_full_guide_button">打开完整教程</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.scriptshot.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -7,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.scriptshot.R;
 
 public class HelpActivity extends AppCompatActivity {
@@ -21,6 +23,10 @@ public class HelpActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        MaterialButton openFullGuide = findViewById(R.id.button_open_full_guide);
+        openFullGuide.setOnClickListener(v ->
+                startActivity(new Intent(this, UserGuideActivity.class)));
     }
 
     @Override
