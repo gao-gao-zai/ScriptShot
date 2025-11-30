@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 
 import com.scriptshot.R;
 import com.scriptshot.core.preferences.CapturePreferences;
@@ -53,6 +54,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private View emptyView;
     private TextView currentDefaultLabel;
     private Button setDefaultButton;
+    private Button deleteButton;
     private String activeScriptName;
 
     @Override
@@ -80,6 +82,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.text_empty_scripts);
         currentDefaultLabel = findViewById(R.id.text_current_default_script);
         setDefaultButton = findViewById(R.id.button_set_default_script);
+        deleteButton = findViewById(R.id.button_delete_script);
     }
 
     private void setupList() {
@@ -103,7 +106,9 @@ public class ScriptManagerActivity extends AppCompatActivity {
         newButton.setOnClickListener(v -> clearEditor());
         saveButton.setOnClickListener(v -> saveCurrentScript());
         setDefaultButton.setOnClickListener(v -> setActiveScriptAsDefault());
+        deleteButton.setOnClickListener(v -> confirmDeleteScript());
         updateSetDefaultState();
+        updateDeleteState();
     }
 
     private void loadScripts() {
@@ -114,6 +119,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             scriptsAdapter.notifyDataSetChanged();
             restoreSelection();
             updateDefaultLabel();
+            updateDeleteState();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
         }
@@ -143,6 +149,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             activeScriptName = scriptName;
             restoreSelection();
             updateSetDefaultState();
+            updateDeleteState();
             Toast.makeText(this, getString(R.string.script_toast_loaded, scriptName), Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
@@ -156,6 +163,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
         scriptContentInput.setText(DEFAULT_TEMPLATE);
         scriptNameInput.requestFocus();
         updateSetDefaultState();
+        updateDeleteState();
     }
 
     private void scriptListClearSelection() {
@@ -181,6 +189,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.script_toast_save_success, Toast.LENGTH_SHORT).show();
             loadScripts();
             updateSetDefaultState();
+            updateDeleteState();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_save_error, Toast.LENGTH_LONG).show();
         }
@@ -207,6 +216,48 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private void updateSetDefaultState() {
         if (setDefaultButton != null) {
             setDefaultButton.setEnabled(!TextUtils.isEmpty(activeScriptName));
+        }
+    }
+
+    private void updateDeleteState() {
+        if (deleteButton == null) {
+            return;
+        }
+        if (TextUtils.isEmpty(activeScriptName)) {
+            deleteButton.setEnabled(false);
+            return;
+        }
+        boolean hasOverride = scriptStorage.hasStoredOverride(activeScriptName);
+        deleteButton.setEnabled(hasOverride);
+    }
+
+    private void confirmDeleteScript() {
+        if (TextUtils.isEmpty(activeScriptName)) {
+            return;
+        }
+        if (!scriptStorage.hasStoredOverride(activeScriptName)) {
+            Toast.makeText(this, R.string.script_delete_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.script_delete_title)
+            .setMessage(getString(R.string.script_delete_message, activeScriptName))
+            .setPositiveButton(R.string.script_delete_confirm, (dialog, which) -> deleteActiveScript())
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
+    }
+
+    private void deleteActiveScript() {
+        if (TextUtils.isEmpty(activeScriptName)) {
+            return;
+        }
+        boolean deleted = scriptStorage.delete(activeScriptName);
+        if (deleted) {
+            Toast.makeText(this, R.string.script_toast_delete_success, Toast.LENGTH_SHORT).show();
+            clearEditor();
+            loadScripts();
+        } else {
+            Toast.makeText(this, R.string.script_toast_delete_error, Toast.LENGTH_LONG).show();
         }
     }
 

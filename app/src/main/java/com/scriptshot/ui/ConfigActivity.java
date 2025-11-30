@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import com.scriptshot.R;
 import com.scriptshot.core.permission.PermissionManager;
@@ -25,6 +26,11 @@ public class ConfigActivity extends AppCompatActivity {
     private TextView accessibilityStatus;
     private TextView rootStatus;
     private TextView defaultScriptStatus;
+    private SwitchCompat scriptsEnabledSwitch;
+    private SwitchCompat captureToastSwitch;
+    private SwitchCompat scriptSuccessToastSwitch;
+    private SwitchCompat scriptErrorToastSwitch;
+    private boolean suppressSwitchCallbacks;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,6 +39,7 @@ public class ConfigActivity extends AppCompatActivity {
         bindViews();
         setupModeSelector();
         setupButtons();
+        setupAutomationToggles();
         refreshStatus();
     }
 
@@ -48,6 +55,10 @@ public class ConfigActivity extends AppCompatActivity {
         accessibilityStatus = findViewById(R.id.text_accessibility_status);
         rootStatus = findViewById(R.id.text_root_status);
         defaultScriptStatus = findViewById(R.id.text_default_script_status);
+        scriptsEnabledSwitch = findViewById(R.id.switch_scripts_enabled);
+        captureToastSwitch = findViewById(R.id.switch_capture_toast);
+        scriptSuccessToastSwitch = findViewById(R.id.switch_script_success_toast);
+        scriptErrorToastSwitch = findViewById(R.id.switch_script_error_toast);
     }
 
     private void setupModeSelector() {
@@ -98,6 +109,42 @@ public class ConfigActivity extends AppCompatActivity {
         });
     }
 
+    private void setupAutomationToggles() {
+        if (scriptsEnabledSwitch != null) {
+            scriptsEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (suppressSwitchCallbacks) {
+                    return;
+                }
+                CapturePreferences.setScriptsEnabled(this, isChecked);
+                refreshStatus();
+            });
+        }
+        if (captureToastSwitch != null) {
+            captureToastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (suppressSwitchCallbacks) {
+                    return;
+                }
+                CapturePreferences.setShowCaptureToast(this, isChecked);
+            });
+        }
+        if (scriptSuccessToastSwitch != null) {
+            scriptSuccessToastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (suppressSwitchCallbacks) {
+                    return;
+                }
+                CapturePreferences.setShowScriptSuccessToast(this, isChecked);
+            });
+        }
+        if (scriptErrorToastSwitch != null) {
+            scriptErrorToastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (suppressSwitchCallbacks) {
+                    return;
+                }
+                CapturePreferences.setShowScriptErrorToast(this, isChecked);
+            });
+        }
+    }
+
     private void refreshStatus() {
         String storageState = PermissionManager.hasMediaReadPermission(this)
             ? getString(R.string.config_status_ok)
@@ -114,8 +161,30 @@ public class ConfigActivity extends AppCompatActivity {
             : getString(R.string.config_status_missing);
         rootStatus.setText(getString(R.string.config_status_root, rootState));
 
-        String defaultScript = CapturePreferences.getDefaultScriptName(this);
-        defaultScriptStatus.setText(getString(R.string.config_default_script_label, defaultScript));
+        if (CapturePreferences.areScriptsEnabled(this)) {
+            String defaultScript = CapturePreferences.getDefaultScriptName(this);
+            defaultScriptStatus.setText(getString(R.string.config_default_script_label, defaultScript));
+        } else {
+            defaultScriptStatus.setText(R.string.config_default_script_disabled);
+        }
+        refreshAutomationToggles();
+    }
+
+    private void refreshAutomationToggles() {
+        suppressSwitchCallbacks = true;
+        if (scriptsEnabledSwitch != null) {
+            scriptsEnabledSwitch.setChecked(CapturePreferences.areScriptsEnabled(this));
+        }
+        if (captureToastSwitch != null) {
+            captureToastSwitch.setChecked(CapturePreferences.shouldShowCaptureToast(this));
+        }
+        if (scriptSuccessToastSwitch != null) {
+            scriptSuccessToastSwitch.setChecked(CapturePreferences.shouldShowScriptSuccessToast(this));
+        }
+        if (scriptErrorToastSwitch != null) {
+            scriptErrorToastSwitch.setChecked(CapturePreferences.shouldShowScriptErrorToast(this));
+        }
+        suppressSwitchCallbacks = false;
     }
 
     @Override

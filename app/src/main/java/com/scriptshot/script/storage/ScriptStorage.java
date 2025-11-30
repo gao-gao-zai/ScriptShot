@@ -20,9 +20,12 @@ import java.util.TreeSet;
 
 public final class ScriptStorage {
 
-    public static final String DEFAULT_SCRIPT_NAME = "Default.js";
+    private static final String ROTATE_SCRIPT = "\u65cb\u8f6c\u622a\u5c4f.js";
+    private static final String SHARE_SCRIPT = "\u5feb\u6377\u5206\u4eab.js";
+    public static final String DEFAULT_SCRIPT_NAME = ROTATE_SCRIPT;
     private static final String SCRIPTS_DIR = "scripts";
     private static final String SCRIPT_EXTENSION = ".js";
+    private static final String[] BUILT_IN_SCRIPTS = new String[] {ROTATE_SCRIPT, SHARE_SCRIPT};
 
     private final Context appContext;
 
@@ -61,20 +64,27 @@ public final class ScriptStorage {
         }
         List<String> result = new ArrayList<>(names);
         result.sort((a, b) -> {
-            boolean aIsDefault = DEFAULT_SCRIPT_NAME.equalsIgnoreCase(a);
-            boolean bIsDefault = DEFAULT_SCRIPT_NAME.equalsIgnoreCase(b);
-            if (aIsDefault && bIsDefault) {
-                return 0;
-            }
-            if (aIsDefault) {
-                return -1;
-            }
-            if (bIsDefault) {
-                return 1;
+            int aRank = builtInRank(a);
+            int bRank = builtInRank(b);
+            if (aRank != bRank) {
+                return Integer.compare(aRank, bRank);
             }
             return a.compareToIgnoreCase(b);
         });
         return result;
+    }
+
+    public boolean delete(String scriptName) {
+        File scriptFile = new File(getScriptsDirectory(), scriptName);
+        if (scriptFile.exists()) {
+            return scriptFile.delete();
+        }
+        return false;
+    }
+
+    public boolean hasStoredOverride(String scriptName) {
+        File scriptFile = new File(getScriptsDirectory(), scriptName);
+        return scriptFile.exists();
     }
 
     public void save(String scriptName, String content) throws IOException {
@@ -102,6 +112,18 @@ public final class ScriptStorage {
             return false;
         }
         return name.toLowerCase(Locale.US).endsWith(SCRIPT_EXTENSION);
+    }
+
+    private int builtInRank(String name) {
+        if (name == null) {
+            return Integer.MAX_VALUE;
+        }
+        for (int i = 0; i < BUILT_IN_SCRIPTS.length; i++) {
+            if (BUILT_IN_SCRIPTS[i].equalsIgnoreCase(name)) {
+                return i;
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
     private String readFile(File file) throws IOException {

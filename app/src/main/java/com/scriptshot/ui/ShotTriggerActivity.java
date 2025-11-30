@@ -126,16 +126,25 @@ public class ShotTriggerActivity extends AppCompatActivity {
 
     private void onScreenshotCaptured(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
         Log.i(TAG, "Screenshot captured: name=" + file.displayName + " path=" + file.absolutePath);
-        Toast.makeText(
-            this,
-            getString(R.string.screenshot_captured_toast, file.displayName),
-            Toast.LENGTH_SHORT
-        ).show();
+        if (CapturePreferences.shouldShowCaptureToast(this)) {
+            Toast.makeText(
+                this,
+                getString(R.string.screenshot_captured_toast, file.displayName),
+                Toast.LENGTH_SHORT
+            ).show();
+        }
         runAutomationScript(file);
         finishFlow();
     }
 
     private void runAutomationScript(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
+        if (!CapturePreferences.areScriptsEnabled(this)) {
+            Log.i(TAG, "Script execution disabled by user preference");
+            if (CapturePreferences.shouldShowScriptSuccessToast(this)) {
+                Toast.makeText(this, R.string.script_execution_disabled_toast, Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         EngineManager engine = EngineManager.getInstance(this);
         String scriptName = CapturePreferences.getDefaultScriptName(this);
         if (TextUtils.isEmpty(scriptName)) {
@@ -154,12 +163,30 @@ public class ShotTriggerActivity extends AppCompatActivity {
         engine.executeByName(scriptName, bindings, new ScriptExecutionCallback() {
             @Override
             public void onSuccess() {
-                mainHandler.post(() -> Log.i(TAG, "Script executed successfully: " + chosenScript));
+                mainHandler.post(() -> {
+                    Log.i(TAG, "Script executed successfully: " + chosenScript);
+                    if (CapturePreferences.shouldShowScriptSuccessToast(ShotTriggerActivity.this)) {
+                        Toast.makeText(
+                            ShotTriggerActivity.this,
+                            getString(R.string.script_success_toast, chosenScript),
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
             }
 
             @Override
             public void onError(Exception error) {
-                mainHandler.post(() -> Log.e(TAG, "Script execution failed for " + chosenScript, error));
+                mainHandler.post(() -> {
+                    Log.e(TAG, "Script execution failed for " + chosenScript, error);
+                    if (CapturePreferences.shouldShowScriptErrorToast(ShotTriggerActivity.this)) {
+                        Toast.makeText(
+                            ShotTriggerActivity.this,
+                            getString(R.string.script_error_toast, chosenScript),
+                            Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
             }
         });
     }

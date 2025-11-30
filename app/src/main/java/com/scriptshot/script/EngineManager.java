@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.scriptshot.script.api.FilesApi;
 import com.scriptshot.script.api.ImgApi;
+import com.scriptshot.script.api.ShareApi;
 import com.scriptshot.script.api.ShellApi;
 import com.scriptshot.script.storage.ScriptStorage;
 
@@ -39,6 +40,7 @@ public final class EngineManager {
     private final ImgApi imgApi;
     private final FilesApi filesApi;
     private final ShellApi shellApi;
+    private final ShareApi shareApi;
     private final ScriptStorage scriptStorage;
     private final Object logFileLock = new Object();
     private final SimpleDateFormat logTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", java.util.Locale.US);
@@ -49,6 +51,7 @@ public final class EngineManager {
         this.imgApi = new ImgApi(appContext);
         this.filesApi = new FilesApi(appContext);
         this.shellApi = new ShellApi();
+        this.shareApi = new ShareApi(appContext);
         this.scriptStorage = new ScriptStorage(appContext);
     }
 
@@ -101,6 +104,7 @@ public final class EngineManager {
             ScriptableObject.putProperty(scope, "img", org.mozilla.javascript.Context.javaToJS(imgApi, scope));
             ScriptableObject.putProperty(scope, "files", org.mozilla.javascript.Context.javaToJS(filesApi, scope));
             ScriptableObject.putProperty(scope, "shell", org.mozilla.javascript.Context.javaToJS(shellApi, scope));
+            ScriptableObject.putProperty(scope, "share", org.mozilla.javascript.Context.javaToJS(shareApi, scope));
             LoggerFunction logger = new LoggerFunction();
             logger.setParentScope(scope);
             ScriptableObject.putProperty(scope, "log", logger);

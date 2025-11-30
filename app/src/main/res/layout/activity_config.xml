@@ -74,6 +74,34 @@
             android:text="@string/config_default_script_label"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_scripts_enabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/config_scripts_enabled_label" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_capture_toast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/config_capture_toast_label" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_script_success_toast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/config_script_success_toast_label" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_script_error_toast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/config_script_error_toast_label" />
+
         <Button
             android:id="@+id/button_refresh"
             android:layout_width="match_parent"

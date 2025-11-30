@@ -58,6 +58,8 @@
 
 - **冷却 (Debounce):** 触发间隔 < 800ms 忽略。
 - **队列 (Queue):** 脚本执行在单线程队列中串行运行，防止多张截图导致 OOM。
+- **可配置提示:** 捕获成功、脚本成功/失败的 Toast 可通过设置开关自定义或关闭。
+- **脚本执行开关:** 用户可暂停自动化，此时仍会截屏但不会运行任何脚本。
 
 ---
 
@@ -74,6 +76,7 @@
 - `img.compress(path, quality, outPath)`: 压缩图片。
 - `img.crop(path, rect)`: 裁剪 (Rect: `{left, top, right, bottom}`)。
 - `img.resize(path, scale)`: 缩放。
+- `img.rotate(path, degrees)`: 旋转图片（默认内置脚本会调用 `180°` 并覆盖原图）。
 - `img.toBase64(path)`: 转 Base64 字符串 (用于 API 上传)。
 - `img.delete(path)`: **重要**。删除图片，并同步从 MediaStore 移除记录，防止相册出现灰图。
 
@@ -123,13 +126,17 @@ _允许脚本在执行过程中请求用户输入。_
 
 - `ocr.recognize(path)`: (可选) 调用 MLKit 离线识别，返回识别到的文本字符串。
 
+### 3.9 `share` (系统分享)
+
+- `share.image(path)`: 通过 `FileProvider` 暴露截图并调用 Android 分享面板，用于“快捷分享”默认脚本。
+
 ---
 
 ## 4. UI/UX 设计
 
 ### 4.1 主界面 (Script Editor)
 
-- **多脚本管理:** 侧边栏或下拉框切换脚本 (e.g., "Default.js", "UploadToGithub.js").
+- **多脚本管理:** 侧边栏或下拉框切换脚本 (e.g., "旋转截屏.js", "快捷分享.js")，支持删除用户覆盖版本并随时回退到内置脚本。
 - **快捷方式绑定:** 每个脚本旁边都有一个“创建桌面图标”按钮。
 
 ### 4.2 运行时 (Invisible)
@@ -158,18 +165,18 @@ _允许脚本在执行过程中请求用户输入。_
 
 ## 6. 开发路线图
 
-1.  **Phase 1: 触发与 MediaStore 闭环**
-    - 实现 Shortcut -> 截图 -> ContentObserver -> 获取 Path。
-    - 验证在 Samsung/Pixel/Xiaomi 机型上的查询语句兼容性。
-2.  **Phase 2: Rhino 与 扩展库**
-    - 集成 JS 引擎。
-    - 优先实现 `img`, `files`, `shell` 模块。
-3.  **Phase 3: 高级交互与网络**
-    - 实现 `http` (OkHttp 封装) 和 `ui` (阻塞式 Dialog 实现)。
-    - 实现 `clipboard`。
-4.  **Phase 4: 稳定性**
-    - 完善文件写入的 Check Loop。
-    - 处理权限拒绝的异常流程。
+1. **Phase 1: 触发与 MediaStore 闭环**
+   - 实现 Shortcut -> 截图 -> ContentObserver -> 获取 Path。
+   - 验证在 Samsung/Pixel/Xiaomi 机型上的查询语句兼容性。
+2. **Phase 2: Rhino 与 扩展库**
+   - 集成 JS 引擎。
+   - 优先实现 `img`, `files`, `shell` 模块。
+3. **Phase 3: 高级交互与网络**
+   - 实现 `http` (OkHttp 封装) 和 `ui` (阻塞式 Dialog 实现)。
+   - 实现 `clipboard`。
+4. **Phase 4: 稳定性**
+   - 完善文件写入的 Check Loop。
+   - 处理权限拒绝的异常流程。
 
 ---
 
@@ -191,12 +198,13 @@ _允许脚本在执行过程中请求用户输入。_
 
 ### 7.3 模块 API（首批完成）
 
-| 模块            | 文件                                          | 说明                                                                         |
-| --------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
-| `ImgApi`        | `com.scriptshot.script.api.ImgApi`            | `load / toBase64 / compress / delete`，删除时同步清理 MediaStore 记录。      |
-| `FilesApi`      | `com.scriptshot.script.api.FilesApi`          | `read / write / exists / list`，默认相对路径映射到 `Context#getFilesDir()`。 |
-| `ShellApi`      | `com.scriptshot.script.api.ShellApi`          | `exec` 走 `sh -c`，`sudo` 走 `su -c`，返回 `{code, stdout, stderr}`。        |
-| `ScriptStorage` | `com.scriptshot.script.storage.ScriptStorage` | 负责 `files/scripts` 与 `assets/scripts` 的脚本读写、默认脚本回退。          |
+| 模块            | 文件                                          | 说明                                                                             |
+| --------------- | --------------------------------------------- | -------------------------------------------------------------------------------- |
+| `ImgApi`        | `com.scriptshot.script.api.ImgApi`            | `load / toBase64 / compress / rotate / delete`，删除时同步清理 MediaStore 记录。 |
+| `FilesApi`      | `com.scriptshot.script.api.FilesApi`          | `read / write / exists / list`，默认相对路径映射到 `Context#getFilesDir()`。     |
+| `ShellApi`      | `com.scriptshot.script.api.ShellApi`          | `exec` 走 `sh -c`，`sudo` 走 `su -c`，返回 `{code, stdout, stderr}`。            |
+| `ShareApi`      | `com.scriptshot.script.api.ShareApi`          | `share.image` 通过 `FileProvider` + `ACTION_SEND` 打开系统分享面板。             |
+| `ScriptStorage` | `com.scriptshot.script.storage.ScriptStorage` | 负责 `files/scripts` 与 `assets/scripts` 的脚本读写、默认脚本回退。              |
 
 ### 7.4 截图闭环注入点
 
@@ -208,10 +216,12 @@ _允许脚本在执行过程中请求用户输入。_
 
 ### 7.5 默认脚本与存储
 
-- `assets/scripts/Default.js`
-  - Demo：加载截图信息、输出 Base64 长度、写入 `files/scripts/runtime.log`。
-  - 首次运行会从 assets 拷贝；用户保存自定义脚本后将覆盖到 `files/scripts/Default.js`。
-- 验收：真实截屏后，日志中可看到 `ScriptShot default script is running` & `Script executed successfully`。
+- `assets/scripts/旋转截屏.js`
+  - 默认：捕获后旋转 180° 并覆盖原图。
+- `assets/scripts/快捷分享.js`
+  - 辅助：自动拉起系统分享面板。
+- 用户可保存同名脚本覆盖行为，并可在脚本管理页删除覆盖文件以回退到官方版本；内置脚本永远显示在列表顶部。
+- 验收：真实截屏后，脚本管理页可见两份内置脚本，且“删除覆盖”按钮仅在存在本地覆写时可用。
 
 ### 7.6 验收清单
 
