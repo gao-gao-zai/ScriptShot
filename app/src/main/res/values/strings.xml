@@ -22,6 +22,7 @@
     <string name="config_button_refresh_status">Refresh status</string>
     <string name="config_button_manage_scripts">Manage scripts</string>
     <string name="shortcut_label_capture">ScriptShot Capture</string>
+    <string name="shortcut_label_script">Run %1$s</string>
     <string name="shortcut_created_toast">Shortcut request sent</string>
     <string name="shortcut_not_supported_toast">Your launcher does not allow pinned shortcuts.</string>
     <string name="config_mode_saved_toast">Mode updated</string>
@@ -52,8 +53,12 @@
     <string name="script_toast_delete_success">Script override deleted.</string>
     <string name="script_toast_delete_error">Unable to delete script.</string>
     <string name="script_delete_unavailable">Only saved overrides can be deleted.</string>
+    <string name="script_create_shortcut_button">Create home shortcut</string>
+    <string name="script_toast_shortcut_success">Shortcut request sent.</string>
+    <string name="script_toast_shortcut_error">Unable to create shortcut.</string>
     <string name="config_manage_scripts_hint">Automation runs right after each screenshot. Use "Manage scripts" to edit built-ins like "&#x65cb;&#x8f6c;&#x622a;&#x5c4f;.js" or create your own.</string>
     <string name="config_default_script_label">Current default script: %1$s</string>
+    <string name="config_qs_hint">Add the ScriptShot quick settings tile from the notification shade to trigger silent captures.</string>
     <string name="config_default_script_disabled">Script automation is currently disabled.</string>
     <string name="config_scripts_enabled_label">Enable script automation</string>
     <string name="config_capture_toast_label">Show screenshot captured toast</string>

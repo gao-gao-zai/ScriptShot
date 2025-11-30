@@ -9,6 +9,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.scriptshot.R;
+import com.scriptshot.core.trigger.TriggerContract;
 import com.scriptshot.ui.ShotTriggerActivity;
 
 public final class ShortcutHelper {
@@ -42,9 +43,40 @@ public final class ShortcutHelper {
     }
 
     private static Intent createCaptureIntent(Context context) {
-        Intent intent = new Intent(context, ShotTriggerActivity.class);
-        intent.setAction("com.scriptshot.action.CAPTURE");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        return intent;
+        // 使用当前默认脚本与主界面保持一致
+        String defaultScript = com.scriptshot.core.preferences.CapturePreferences.getDefaultScriptName(context);
+        return TriggerContract.buildRunIntent(context, defaultScript, true, false, false);
+    }
+
+    public static boolean requestScriptShortcut(Context context, String scriptName) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ShortcutManager manager = context.getSystemService(ShortcutManager.class);
+            if (manager == null || !manager.isRequestPinShortcutSupported()) {
+                Log.w(TAG, "Pinned shortcuts not supported for script " + scriptName);
+                return false;
+            }
+            String shortcutId = buildScriptShortcutId(scriptName);
+            ShortcutInfo shortcut = new ShortcutInfo.Builder(context, shortcutId)
+                .setShortLabel(context.getString(R.string.shortcut_label_script, scriptName))
+                .setIcon(Icon.createWithResource(context, R.drawable.ic_shortcut))
+                .setIntent(createScriptIntent(context, scriptName))
+                .build();
+            manager.requestPinShortcut(shortcut, null);
+            return true;
+        }
+        Intent install = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        install.putExtra(Intent.EXTRA_SHORTCUT_NAME, context.getString(R.string.shortcut_label_script, scriptName));
+        install.putExtra(Intent.EXTRA_SHORTCUT_INTENT, createScriptIntent(context, scriptName));
+        install.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(context, R.drawable.ic_shortcut));
+        context.sendBroadcast(install);
+        return true;
+    }
+
+    private static Intent createScriptIntent(Context context, String scriptName) {
+        return TriggerContract.buildRunIntent(context, scriptName, true, false, false);
+    }
+
+    private static String buildScriptShortcutId(String scriptName) {
+        return "scriptshot_" + Math.abs(scriptName.hashCode());
     }
 }

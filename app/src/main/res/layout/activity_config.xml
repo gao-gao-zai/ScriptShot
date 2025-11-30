@@ -150,5 +150,13 @@
             android:text="@string/config_manage_scripts_hint"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
+        <TextView
+            android:id="@+id/text_qs_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/config_qs_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
     </LinearLayout>
 </ScrollView>

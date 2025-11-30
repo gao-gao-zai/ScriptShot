@@ -19,9 +19,9 @@
 
 应用不设常驻后台服务，完全由外部事件唤起：
 
-1.  **桌面快捷方式:** 一键运行指定脚本。
-2.  **Intent 调用:** `am start ...`，供 Tasker/Macrodroid 集成。
-3.  **QS Tile:** 下拉通知栏快速触发。
+1. **桌面快捷方式:** 一键运行指定脚本。
+2. **Intent 调用:** `am start ...`，供 Tasker/Macrodroid 集成。
+3. **QS Tile:** 下拉通知栏快速触发。
 
 ### 2.2 捕获流程：MediaStore 监听方案 (The Capture Loop)
 
@@ -29,30 +29,30 @@
 
 **执行时序:**
 
-1.  **初始化 (Init):**
+1. **初始化 (Init):**
 
-    - 记录当前时间戳 `T_start = System.currentTimeMillis()`.
-    - 在 `MediaStore.Images.Media.EXTERNAL_CONTENT_URI` 上注册 `ContentObserver`。
-    - 启动 **10 秒** 的超时倒计时 (系统索引可能存在延迟)。
+   - 记录当前时间戳 `T_start = System.currentTimeMillis()`.
+   - 在 `MediaStore.Images.Media.EXTERNAL_CONTENT_URI` 上注册 `ContentObserver`。
+   - 启动 **10 秒** 的超时倒计时 (系统索引可能存在延迟)。
 
-2.  **动作 (Action):**
+2. **动作 (Action):**
 
-    - **Root:** 执行 `input keyevent 120` 或 `svc` 命令。
-    - **No-Root:** 调用 `AccessibilityService.performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT)`。
+   - **Root:** 执行 `input keyevent 120` 或 `svc` 命令。
+   - **No-Root:** 调用 `AccessibilityService.performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT)`。
 
-3.  **监听与查询 (Listen & Query):**
+3. **监听与查询 (Listen & Query):**
 
-    - 当 `ContentObserver.onChange` 被触发时：
-    - 立即查询 `MediaStore`，按 `DATE_ADDED` 或 `DATE_MODIFIED` 降序排列，取第一条。
-    - **过滤条件 (Heuristics):**
-      - `date_added >= T_start / 1000` (秒级时间戳匹配)。
-      - `bucket_display_name` 包含 "Screenshot" 或 "截屏" (可选，视厂商而定)。
-    - _注意：如果查询到的最新图片时间早于 `T_start`，则视为本次事件是旧图触发的干扰，忽略之。_
+   - 当 `ContentObserver.onChange` 被触发时：
+   - 立即查询 `MediaStore`，按 `DATE_ADDED` 或 `DATE_MODIFIED` 降序排列，取第一条。
+   - **过滤条件 (Heuristics):**
+     - `date_added >= T_start / 1000` (秒级时间戳匹配)。
+     - `bucket_display_name` 包含 "Screenshot" 或 "截屏" (可选，视厂商而定)。
+   - _注意：如果查询到的最新图片时间早于 `T_start`，则视为本次事件是旧图触发的干扰，忽略之。_
 
-4.  **锁定与注入 (Lock & Inject):**
-    - 一旦匹配成功，立即注销 Observer。
-    - 获取该图片的 `_data` (绝对路径) 和 `_id` (Uri ID)。
-    - 将路径注入脚本引擎。
+4. **锁定与注入 (Lock & Inject):**
+   - 一旦匹配成功，立即注销 Observer。
+   - 获取该图片的 `_data` (绝对路径) 和 `_id` (Uri ID)。
+   - 将路径注入脚本引擎。
 
 ### 2.3 并发控制 (Concurrency)
 
@@ -60,6 +60,15 @@
 - **队列 (Queue):** 脚本执行在单线程队列中串行运行，防止多张截图导致 OOM。
 - **可配置提示:** 捕获成功、脚本成功/失败的 Toast 可通过设置开关自定义或关闭。
 - **脚本执行开关:** 用户可暂停自动化，此时仍会截屏但不会运行任何脚本。
+
+### 2.4 触发入口扩展
+
+- **桌面快捷方式:** 通过 `ShortcutHelper` 为任意脚本创建图标，内部使用 `TriggerContract.ACTION_RUN_SCRIPT` 并携带 `EXTRA_SCRIPT_NAME`，以静默方式执行指定脚本。
+- **第三方 Intent:** 外部 App 可 `startActivity` → `com.scriptshot.action.RUN_SCRIPT`，可选 extras:
+  - `EXTRA_SCRIPT_NAME`：脚本文件名（默认使用全局设置）。
+  - `EXTRA_SILENT`：布尔值，静默模式时不展示 UI/Toast。
+  - `EXTRA_SKIP_CAPTURE`：布尔值，若为 `true` 则直接运行脚本（无截图上下文，脚本需自处理）。
+- **快捷设置 Tile:** `ScriptShotTileService` 注册到 QS 面板，点击即以静默方式触发一次截图 + 默认脚本。
 
 ---
 
@@ -137,7 +146,7 @@ _允许脚本在执行过程中请求用户输入。_
 ### 4.1 主界面 (Script Editor)
 
 - **多脚本管理:** 侧边栏或下拉框切换脚本 (e.g., "旋转截屏.js", "快捷分享.js")，支持删除用户覆盖版本并随时回退到内置脚本。
-- **快捷方式绑定:** 每个脚本旁边都有一个“创建桌面图标”按钮。
+- **快捷方式绑定:** 每个脚本旁边都有一个“创建桌面图标”按钮，可生成静默快捷方式并指定脚本。
 
 ### 4.2 运行时 (Invisible)
 
@@ -234,3 +243,12 @@ _允许脚本在执行过程中请求用户输入。_
 
 - Phase 3 开发 `http/ui/clipboard` 时，直接在 `EngineManager` 注入新的模块实例即可，无需修改调用方。
 - 需要持久脚本管理 UI 时，可通过 `ScriptStorage.save` 与现有目录结构重用。
+
+### 7.8 触发协议（TriggerContract）
+
+- `TriggerContract.ACTION_RUN_SCRIPT`：公开的 Activity Intent，内部路由到 `ShotTriggerActivity`。
+- Extras:
+  - `EXTRA_SCRIPT_NAME`：可选，指定脚本名。
+  - `EXTRA_SILENT`：布尔值，静默执行时不展示 UI/Toast。
+  - `EXTRA_SKIP_CAPTURE`：布尔值，为 true 时跳过截图阶段，直接以空绑定执行脚本。
+- 快捷方式、QS Tile 以及第三方集成都通过该协议复用同一条执行链路，避免实现差异。

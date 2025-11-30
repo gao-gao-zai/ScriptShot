@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.scriptshot.R;
 import com.scriptshot.core.preferences.CapturePreferences;
+import com.scriptshot.core.shortcut.ShortcutHelper;
 import com.scriptshot.script.storage.ScriptStorage;
 
 import java.io.IOException;
@@ -55,6 +56,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private TextView currentDefaultLabel;
     private Button setDefaultButton;
     private Button deleteButton;
+    private Button createShortcutButton;
     private String activeScriptName;
 
     @Override
@@ -83,6 +85,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
         currentDefaultLabel = findViewById(R.id.text_current_default_script);
         setDefaultButton = findViewById(R.id.button_set_default_script);
         deleteButton = findViewById(R.id.button_delete_script);
+        createShortcutButton = findViewById(R.id.button_create_shortcut);
     }
 
     private void setupList() {
@@ -107,8 +110,10 @@ public class ScriptManagerActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveCurrentScript());
         setDefaultButton.setOnClickListener(v -> setActiveScriptAsDefault());
         deleteButton.setOnClickListener(v -> confirmDeleteScript());
+        createShortcutButton.setOnClickListener(v -> createShortcutForActiveScript());
         updateSetDefaultState();
         updateDeleteState();
+        updateShortcutState();
     }
 
     private void loadScripts() {
@@ -120,6 +125,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             restoreSelection();
             updateDefaultLabel();
             updateDeleteState();
+            updateShortcutState();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
         }
@@ -150,6 +156,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             restoreSelection();
             updateSetDefaultState();
             updateDeleteState();
+            updateShortcutState();
             Toast.makeText(this, getString(R.string.script_toast_loaded, scriptName), Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_load_error, Toast.LENGTH_LONG).show();
@@ -164,6 +171,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
         scriptNameInput.requestFocus();
         updateSetDefaultState();
         updateDeleteState();
+        updateShortcutState();
     }
 
     private void scriptListClearSelection() {
@@ -190,6 +198,7 @@ public class ScriptManagerActivity extends AppCompatActivity {
             loadScripts();
             updateSetDefaultState();
             updateDeleteState();
+            updateShortcutState();
         } catch (IOException e) {
             Toast.makeText(this, R.string.script_toast_save_error, Toast.LENGTH_LONG).show();
         }
@@ -229,6 +238,23 @@ public class ScriptManagerActivity extends AppCompatActivity {
         }
         boolean hasOverride = scriptStorage.hasStoredOverride(activeScriptName);
         deleteButton.setEnabled(hasOverride);
+    }
+
+    private void updateShortcutState() {
+        if (createShortcutButton == null) {
+            return;
+        }
+        createShortcutButton.setEnabled(!TextUtils.isEmpty(activeScriptName));
+    }
+
+    private void createShortcutForActiveScript() {
+        if (TextUtils.isEmpty(activeScriptName)) {
+            Toast.makeText(this, R.string.script_error_name_required, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        boolean requested = ShortcutHelper.requestScriptShortcut(this, activeScriptName);
+        int message = requested ? R.string.script_toast_shortcut_success : R.string.script_toast_shortcut_error;
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     private void confirmDeleteScript() {

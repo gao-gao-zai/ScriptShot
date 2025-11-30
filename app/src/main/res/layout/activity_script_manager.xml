@@ -118,6 +118,13 @@
         android:layout_marginTop="8dp"
         android:text="@string/script_delete_button" />
 
+    <Button
+        android:id="@+id/button_create_shortcut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/script_create_shortcut_button" />
+
     <EditText
         android:id="@+id/input_script_content"
         android:layout_width="match_parent"

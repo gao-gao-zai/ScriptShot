@@ -21,6 +21,7 @@ import com.scriptshot.core.root.RootUtils;
 import com.scriptshot.core.screenshot.ScreenshotAction;
 import com.scriptshot.core.screenshot.ScreenshotActionFactory;
 import com.scriptshot.core.screenshot.ScreenshotContentObserver;
+import com.scriptshot.core.trigger.TriggerContract;
 import com.scriptshot.script.EngineManager;
 import com.scriptshot.script.ScriptExecutionCallback;
 import com.scriptshot.script.storage.ScriptStorage;
@@ -40,10 +41,18 @@ public class ShotTriggerActivity extends AppCompatActivity {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Runnable timeoutRunnable = this::handleTimeout;
     private long captureStartTime;
+    private boolean silentMode;
+    private boolean suppressFeedback;
+    private boolean skipCapture;
+    private String overrideScriptName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        processTriggerIntent(getIntent());
+        if (silentMode) {
+            backgroundTaskIfPossible();
+        }
         if (isFastDoubleTrigger()) {
             Log.d(TAG, "Debounced rapid trigger");
             finish();
@@ -57,10 +66,49 @@ public class ShotTriggerActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        processTriggerIntent(intent);
+        if (silentMode) {
+            backgroundTaskIfPossible();
+        }
         attemptStartFlow();
     }
 
+    private void backgroundTaskIfPossible() {
+        try {
+            boolean moved = moveTaskToBack(true);
+            Log.d(TAG, "moveTaskToBack result=" + moved);
+        } catch (Exception e) {
+            Log.d(TAG, "Unable to move task to back", e);
+        }
+    }
+
+    private void processTriggerIntent(@Nullable Intent intent) {
+        silentMode = false;
+        suppressFeedback = false;
+        skipCapture = false;
+        overrideScriptName = null;
+        if (intent == null) {
+            return;
+        }
+        if (TriggerContract.ACTION_RUN_SCRIPT.equals(intent.getAction())) {
+            overrideScriptName = intent.getStringExtra(TriggerContract.EXTRA_SCRIPT_NAME);
+            silentMode = intent.getBooleanExtra(TriggerContract.EXTRA_SILENT, false);
+            if (intent.hasExtra(TriggerContract.EXTRA_SUPPRESS_FEEDBACK)) {
+                suppressFeedback = intent.getBooleanExtra(TriggerContract.EXTRA_SUPPRESS_FEEDBACK, false);
+            } else {
+                suppressFeedback = false;
+            }
+            skipCapture = intent.getBooleanExtra(TriggerContract.EXTRA_SKIP_CAPTURE, false);
+        }
+    }
+
     private void attemptStartFlow() {
+        if (skipCapture) {
+            Log.d(TAG, "Skip capture requested via intent; running automation immediately");
+            runAutomationScript(null);
+            finishFlow();
+            return;
+        }
         if (!PermissionManager.hasMediaReadPermission(this)) {
             Log.w(TAG, "Missing READ_MEDIA permission, requesting now");
             PermissionManager.requestMediaReadPermission(this);
@@ -81,19 +129,29 @@ public class ShotTriggerActivity extends AppCompatActivity {
         Log.d(TAG, "ensureCaptureChannel mode=" + mode + " root=" + hasRoot + " accessibility=" + hasAccessibility);
 
         if (mode == CaptureMode.ROOT && !hasRoot) {
-            Toast.makeText(this, R.string.root_required_toast, Toast.LENGTH_LONG).show();
+            if (!suppressFeedback) {
+                Toast.makeText(this, R.string.root_required_toast, Toast.LENGTH_LONG).show();
+            }
             finish();
             return false;
         }
         if (mode == CaptureMode.ACCESSIBILITY && !hasAccessibility) {
-            Toast.makeText(this, R.string.accessibility_required_toast, Toast.LENGTH_LONG).show();
-            PermissionManager.openAccessibilitySettings(this);
+            if (!suppressFeedback) {
+                Toast.makeText(this, R.string.accessibility_required_toast, Toast.LENGTH_LONG).show();
+            }
+            if (!silentMode) {
+                PermissionManager.openAccessibilitySettings(this);
+            }
             finish();
             return false;
         }
         if (!hasRoot && !hasAccessibility) {
-            Toast.makeText(this, R.string.accessibility_required_toast, Toast.LENGTH_LONG).show();
-            PermissionManager.openAccessibilitySettings(this);
+            if (!suppressFeedback) {
+                Toast.makeText(this, R.string.accessibility_required_toast, Toast.LENGTH_LONG).show();
+            }
+            if (!silentMode) {
+                PermissionManager.openAccessibilitySettings(this);
+            }
             finish();
             return false;
         }
@@ -119,14 +177,16 @@ public class ShotTriggerActivity extends AppCompatActivity {
         ScreenshotAction action = ScreenshotActionFactory.create(this, preferRoot);
         if (!action.takeScreenshot()) {
             Log.w(TAG, "Failed to dispatch screenshot action");
-            Toast.makeText(this, R.string.screenshot_timeout_toast, Toast.LENGTH_SHORT).show();
+            if (!suppressFeedback) {
+                Toast.makeText(this, R.string.screenshot_timeout_toast, Toast.LENGTH_SHORT).show();
+            }
             finishFlow();
         }
     }
 
     private void onScreenshotCaptured(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
         Log.i(TAG, "Screenshot captured: name=" + file.displayName + " path=" + file.absolutePath);
-        if (CapturePreferences.shouldShowCaptureToast(this)) {
+        if (CapturePreferences.shouldShowCaptureToast(this) && !suppressFeedback) {
             Toast.makeText(
                 this,
                 getString(R.string.screenshot_captured_toast, file.displayName),
@@ -137,27 +197,31 @@ public class ShotTriggerActivity extends AppCompatActivity {
         finishFlow();
     }
 
-    private void runAutomationScript(@NonNull ScreenshotContentObserver.ScreenshotFile file) {
+    private void runAutomationScript(@Nullable ScreenshotContentObserver.ScreenshotFile file) {
         if (!CapturePreferences.areScriptsEnabled(this)) {
             Log.i(TAG, "Script execution disabled by user preference");
-            if (CapturePreferences.shouldShowScriptSuccessToast(this)) {
+            if (CapturePreferences.shouldShowScriptSuccessToast(this) && !suppressFeedback) {
                 Toast.makeText(this, R.string.script_execution_disabled_toast, Toast.LENGTH_SHORT).show();
             }
             return;
         }
         EngineManager engine = EngineManager.getInstance(this);
-        String scriptName = CapturePreferences.getDefaultScriptName(this);
+        String scriptName = !TextUtils.isEmpty(overrideScriptName)
+            ? overrideScriptName
+            : CapturePreferences.getDefaultScriptName(this);
         if (TextUtils.isEmpty(scriptName)) {
             scriptName = ScriptStorage.DEFAULT_SCRIPT_NAME;
         }
         Map<String, Object> bindings = new HashMap<>();
-        String absolutePath = file.absolutePath;
-        if (!TextUtils.isEmpty(absolutePath)) {
-            bindings.put("screenshotPath", absolutePath);
-        } else {
-            bindings.put("screenshotPath", file.contentUri.toString());
+        if (file != null) {
+            String absolutePath = file.absolutePath;
+            if (!TextUtils.isEmpty(absolutePath)) {
+                bindings.put("screenshotPath", absolutePath);
+            } else {
+                bindings.put("screenshotPath", file.contentUri.toString());
+            }
+            bindings.put("screenshotMeta", createMetadataMap(file));
         }
-        bindings.put("screenshotMeta", createMetadataMap(file));
 
         final String chosenScript = scriptName;
         engine.executeByName(scriptName, bindings, new ScriptExecutionCallback() {
@@ -165,7 +229,7 @@ public class ShotTriggerActivity extends AppCompatActivity {
             public void onSuccess() {
                 mainHandler.post(() -> {
                     Log.i(TAG, "Script executed successfully: " + chosenScript);
-                    if (CapturePreferences.shouldShowScriptSuccessToast(ShotTriggerActivity.this)) {
+                    if (CapturePreferences.shouldShowScriptSuccessToast(ShotTriggerActivity.this) && !suppressFeedback) {
                         Toast.makeText(
                             ShotTriggerActivity.this,
                             getString(R.string.script_success_toast, chosenScript),
@@ -179,7 +243,7 @@ public class ShotTriggerActivity extends AppCompatActivity {
             public void onError(Exception error) {
                 mainHandler.post(() -> {
                     Log.e(TAG, "Script execution failed for " + chosenScript, error);
-                    if (CapturePreferences.shouldShowScriptErrorToast(ShotTriggerActivity.this)) {
+                    if (CapturePreferences.shouldShowScriptErrorToast(ShotTriggerActivity.this) && !suppressFeedback) {
                         Toast.makeText(
                             ShotTriggerActivity.this,
                             getString(R.string.script_error_toast, chosenScript),
@@ -202,7 +266,9 @@ public class ShotTriggerActivity extends AppCompatActivity {
 
     private void handleTimeout() {
         Log.w(TAG, "Screenshot capture timed out");
-        Toast.makeText(this, R.string.screenshot_timeout_toast, Toast.LENGTH_SHORT).show();
+        if (!suppressFeedback) {
+            Toast.makeText(this, R.string.screenshot_timeout_toast, Toast.LENGTH_SHORT).show();
+        }
         finishFlow();
     }
 
@@ -247,7 +313,9 @@ public class ShotTriggerActivity extends AppCompatActivity {
             if (PermissionManager.hasGranted(grantResults)) {
                 attemptStartFlow();
             } else {
-                Toast.makeText(this, R.string.permission_required_toast, Toast.LENGTH_SHORT).show();
+                if (!suppressFeedback) {
+                    Toast.makeText(this, R.string.permission_required_toast, Toast.LENGTH_SHORT).show();
+                }
                 finish();
             }
         }

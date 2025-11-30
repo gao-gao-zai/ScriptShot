@@ -22,6 +22,7 @@
     <string name="config_button_refresh_status">刷新状态</string>
     <string name="config_button_manage_scripts">管理脚本</string>
     <string name="shortcut_label_capture">ScriptShot 截屏</string>
+    <string name="shortcut_label_script">运行 %1$s</string>
     <string name="shortcut_created_toast">已发送快捷方式请求。</string>
     <string name="shortcut_not_supported_toast">当前桌面不支持固定快捷方式。</string>
     <string name="config_mode_saved_toast">模式已更新。</string>
@@ -52,8 +53,12 @@
     <string name="script_toast_delete_success">已删除脚本覆盖。</string>
     <string name="script_toast_delete_error">无法删除脚本。</string>
     <string name="script_delete_unavailable">只能删除已保存的覆盖版本。</string>
+    <string name="script_create_shortcut_button">创建桌面快捷方式</string>
+    <string name="script_toast_shortcut_success">已发送快捷方式请求。</string>
+    <string name="script_toast_shortcut_error">无法创建快捷方式。</string>
     <string name="config_manage_scripts_hint">若启用自动化，每次截图完成后都会运行脚本。通过“管理脚本”可编辑“旋转截屏.js”等内置脚本或新增自定义脚本。</string>
     <string name="config_default_script_label">当前默认脚本：%1$s</string>
+    <string name="config_qs_hint">可在通知栏的快捷设置中添加 ScriptShot 磁贴，实现静默触发。</string>
     <string name="config_default_script_disabled">脚本自动化当前处于关闭状态。</string>
     <string name="config_scripts_enabled_label">开启脚本自动化</string>
     <string name="config_capture_toast_label">提示“已捕获截图”</string>
