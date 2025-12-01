@@ -6,9 +6,11 @@
   <img src="https://img.shields.io/badge/Language-Java-orange" alt="Java">
 </p>
 
-**ScriptShot** is an Android screenshot automation tool that automatically executes JavaScript scripts after each capture. Whether you want to rotate images, add watermarks, share automatically, or run other custom processing logic, you can do it with simple scripts.
+<p align="center">
+  <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a>
+</p>
 
-[English](README.md) | [简体中文](README_CN.md)
+**ScriptShot** is an Android screenshot automation tool that automatically executes JavaScript scripts after each capture. Whether you want to rotate images, add watermarks, share automatically, or run other custom processing logic, you can do it with simple scripts.
 
 ---
 
