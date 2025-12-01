@@ -1,4 +1,4 @@
-# ScriptShot 脚本截屏
+# ScriptShot Screenshot Automation
 
 <p align="center">
   <img src="https://img.shields.io/badge/Android-7.0+-brightgreen" alt="Android 7.0+">
@@ -6,197 +6,199 @@
   <img src="https://img.shields.io/badge/Language-Java-orange" alt="Java">
 </p>
 
-**ScriptShot** 是一款 Android 截屏自动化工具，支持在每次截屏后自动执行 JavaScript 脚本。无论是旋转图片、添加水印、自动分享，还是其他自定义处理逻辑，都可以通过简单的脚本实现。
+**ScriptShot** is an Android screenshot automation tool that automatically executes JavaScript scripts after each capture. Whether you want to rotate images, add watermarks, share automatically, or run other custom processing logic, you can do it with simple scripts.
+
+[English](README.md) | [简体中文](README_CN.md)
 
 ---
 
-## ✨ 主要功能
+## ✨ Features
 
-- 📸 **多种截屏方式**：支持 Root 模式和无障碍模式
-- ⚡ **截屏后自动化**：截图完成后自动运行 JavaScript 脚本
-- 🖼️ **丰富的图像处理**：旋转、裁剪、缩放、水印、模糊等
-- 📝 **内置脚本编辑器**：带语法高亮的 JS 编辑器，随时修改脚本
-- 🚀 **快捷触发**：支持桌面快捷方式和快捷设置磁贴
-- 🌐 **双语支持**：中英文界面
-
----
-
-## 📱 系统要求
-
-- Android 7.0 (API 24) 及以上
-- Root 模式需要设备已获取 Root 权限
-- 无障碍模式需要开启无障碍服务
+- 📸 **Multiple capture methods**: supports Root mode and Accessibility mode  
+- ⚡ **Post-screenshot automation**: automatically runs JavaScript scripts after a screenshot is taken  
+- 🖼️ **Rich image processing**: rotate, crop, resize, watermark, blur, and more  
+- 📝 **Built-in script editor**: JavaScript editor with syntax highlighting so you can edit scripts anytime  
+- 🚀 **Quick triggers**: supports home screen shortcuts and Quick Settings tile  
+- 🌐 **Bilingual UI**: Chinese and English
 
 ---
 
-## 🚀 快速上手
+## 📱 System Requirements
 
-### 1. 授予权限
-
-打开应用后，点击「授予媒体权限」以允许读取截图。
-
-### 2. 选择截屏方式
-
-| 模式 | 说明 |
-|------|------|
-| **Root 模式** | 通过 `su` 命令执行截屏，速度更快，需要 Root 权限 |
-| **无障碍模式** | 通过系统无障碍 API 截屏，无需 Root，适合普通用户 |
-
-### 3. 开启脚本自动化（可选）
-
-在设置页面开启「脚本自动化」开关，每次截屏后将自动运行默认脚本。
-
-### 4. 触发截屏
-
-- **桌面快捷方式**：点击「创建截屏快捷方式」添加到桌面
-- **快捷设置磁贴**：在通知栏快捷设置中添加 ScriptShot 磁贴
-- **测试按钮**：点击「立即测试截屏」进行测试
+- Android 7.0 (API 24) or higher  
+- Root mode requires a device with root access  
+- Accessibility mode requires enabling the accessibility service  
 
 ---
 
-## 📜 内置脚本
+## 🚀 Getting Started
 
-| 脚本名 | 功能 |
-|--------|------|
-| `旋转截屏.js` | 将截图旋转 180°，适合倒拿手机时使用 |
-| `快捷分享.js` | 截图后自动弹出系统分享面板 |
-| `Default.js` | 默认脚本（空操作） |
+### 1. Grant permissions
 
-你可以在「管理脚本」页面编辑这些脚本或创建自己的自定义脚本。
+After opening the app, tap **“Grant media permission”** to allow reading screenshots.
+
+### 2. Choose capture mode
+
+| Mode | Description |
+|------|-------------|
+| **Root mode** | Uses the `su` command to capture screenshots. Faster, but requires root. |
+| **Accessibility mode** | Uses the system Accessibility API to capture screenshots. No root required, suitable for regular users. |
+
+### 3. Enable script automation (optional)
+
+On the settings page, turn on the **“Script automation”** switch so the default script runs automatically after each screenshot.
+
+### 4. Trigger screenshots
+
+- **Home screen shortcut**: tap **“Create screenshot shortcut”** to add it to the home screen  
+- **Quick Settings tile**: add the ScriptShot tile in the notification shade Quick Settings  
+- **Test button**: tap **“Test screenshot now”** to perform a quick test  
 
 ---
 
-## 🛠️ 脚本 API 文档
+## 📜 Built-in Scripts
 
-ScriptShot 使用 [Rhino](https://github.com/mozilla/rhino) JavaScript 引擎，提供了丰富的内置 API。
+| Script name | Description |
+|------------|-------------|
+| `旋转截屏.js` | Rotates the screenshot 180°, useful when you are holding the phone upside down |
+| `快捷分享.js` | Automatically opens the system share sheet after taking a screenshot |
+| `Default.js` | Default script (no operation) |
 
-### 全局变量
+You can edit these scripts or create your own custom scripts on the **“Manage scripts”** page.
 
-| 变量名 | 类型 | 说明 |
-|--------|------|------|
-| `screenshotPath` | `string` | 最新截图的文件路径 |
+---
 
-### 全局函数
+## 🛠️ Script API Reference
+
+ScriptShot uses the [Rhino](https://github.com/mozilla/rhino) JavaScript engine and provides a rich set of built-in APIs.
+
+### Global variables
+
+| Name | Type | Description |
+|------|------|-------------|
+| `screenshotPath` | `string` | File path of the latest screenshot |
+
+### Global functions
 
 ```javascript
-log(message)  // 输出日志到 engine.log
+log(message);  // Write a log entry to engine.log
 ```
 
-### img - 图像处理 API
+### img - Image Processing API
 
 ```javascript
-// 加载图片信息
+// Load image information
 var info = img.load(path);
-// 返回: { width, height, bytes, mime }
+// Returns: { width, height, bytes, mime }
 
-// 旋转图片
+// Rotate image
 img.rotate(path, degrees);
 
-// 裁剪图片
+// Crop image
 img.cropCenter(path, width, height, outPath);
 img.cropRelative(path, leftRatio, topRatio, rightRatio, bottomRatio, outPath);
 
-// 缩放图片
+// Resize image
 img.resizeToMaxEdge(path, maxEdge, outPath);
 img.resizeToFit(path, maxWidth, maxHeight, outPath);
 
-// 压缩图片
+// Compress image
 img.compress(path, quality, outPath);
 
-// 添加水印
+// Add watermark
 img.watermarkText(path, text, position, textSize, color, padding, outPath);
 img.watermarkImage(path, watermarkPath, position, scale, padding, outPath);
 // position: "top_left", "top_right", "bottom_left", "bottom_right", "center"
 
-// 绘制矩形
+// Draw rectangles
 img.fillRect(path, left, top, right, bottom, color, outPath);
 img.drawRect(path, left, top, right, bottom, color, strokeWidth, outPath);
 
-// 模糊区域
+// Blur region
 img.blurRect(path, left, top, right, bottom, radius, outPath);
 
-// 添加边距
+// Add padding
 img.pad(path, left, top, right, bottom, color, outPath);
 img.padToAspectRatio(path, targetWidth, targetHeight, color, outPath);
 
-// 灰度化
+// Convert to grayscale
 img.toGrayscale(path, outPath);
 
-// 获取区域平均颜色
+// Get average color in a region
 var color = img.getAverageColor(path, left, top, right, bottom);
 
-// 转 Base64
+// Convert to Base64
 var base64 = img.toBase64(path);
 
-// 删除图片
+// Delete image
 img.delete(path);
 
-// 获取最后输出路径
+// Get last output path
 var outputPath = img.getLastOutputPath();
 ```
 
-### share - 分享 API
+### share - Share API
 
 ```javascript
-share.image(imagePath);           // 分享图片
-share.text(text);                 // 分享文本
-share.imageWithText(path, text);  // 分享图片和文本
+share.image(imagePath);           // Share image
+share.text(text);                 // Share text
+share.imageWithText(path, text);  // Share image and text
 ```
 
-### shell - Shell 命令 API
+### shell - Shell Command API
 
 ```javascript
-// 执行普通 Shell 命令
+// Execute a normal shell command
 var result = shell.exec(command);
 
-// 执行 Root 命令
+// Execute a root shell command
 var result = shell.sudo(command);
 
 // result: { code, stdout, stderr }
 ```
 
-### files - 文件操作 API
+### files - File Operations API
 
 ```javascript
-files.read(path);                    // 读取文件内容
-files.write(path, content);          // 写入文件
-files.append(path, content);         // 追加内容
-files.exists(path);                  // 检查文件是否存在
-files.delete(path);                  // 删除文件
-files.copy(srcPath, destPath);       // 复制文件
-files.move(srcPath, destPath);       // 移动文件
-files.list(dirPath);                 // 列出目录内容
+files.read(path);                    // Read file content
+files.write(path, content);          // Write file content
+files.append(path, content);         // Append content
+files.exists(path);                  // Check whether file exists
+files.delete(path);                  // Delete file
+files.copy(srcPath, destPath);       // Copy file
+files.move(srcPath, destPath);       // Move file
+files.list(dirPath);                 // List directory contents
 ```
 
-### ui - 交互 API
+### ui - UI Interaction API
 
 ```javascript
-ui.toast(message);                   // 显示 Toast
-ui.alert(title, message);            // 弹出提示框
-ui.confirm(title, message);          // 弹出确认框，返回 true/false
-ui.prompt(title, hint, defaultVal);  // 弹出输入框，返回输入内容
+ui.toast(message);                   // Show a Toast
+ui.alert(title, message);            // Show an alert dialog
+ui.confirm(title, message);          // Show a confirm dialog, returns true/false
+ui.prompt(title, hint, defaultVal);  // Show an input dialog, returns the input text
 ```
 
-### notification - 通知 API
+### notification - Notification API
 
 ```javascript
-notification.show(title, message);   // 显示通知
+notification.show(title, message);   // Show a notification
 ```
 
 ---
 
-## 📝 脚本示例
+## 📝 Script Examples
 
-### 旋转截图 180°
+### Rotate screenshot 180°
 
 ```javascript
 if (screenshotPath) {
     img.rotate(screenshotPath, 180);
-    log("截图已旋转 180°");
+    log("Screenshot rotated 180°");
 }
 ```
 
-### 添加时间水印
+### Add timestamp watermark
 
 ```javascript
 if (screenshotPath) {
@@ -205,17 +207,17 @@ if (screenshotPath) {
     img.watermarkText(
         screenshotPath, 
         timestamp, 
-        "bottom_right",  // 位置
-        48,              // 字体大小
-        "#FFFFFF",       // 颜色
-        20,              // 边距
-        null             // 覆盖原图
+        "bottom_right",  // Position
+        48,              // Font size
+        "#FFFFFF",       // Color
+        20,              // Padding
+        null             // Overwrite original image
     );
-    log("已添加时间水印: " + timestamp);
+    log("Added timestamp watermark: " + timestamp);
 }
 ```
 
-### 压缩并分享
+### Compress and share
 
 ```javascript
 if (screenshotPath) {
@@ -225,45 +227,45 @@ if (screenshotPath) {
 }
 ```
 
-### 隐私模糊
+### Privacy blur
 
 ```javascript
 if (screenshotPath) {
     var info = img.load(screenshotPath);
-    // 模糊顶部状态栏区域
+    // Blur the top status bar area
     img.blurRect(screenshotPath, 0, 0, info.width, 100, 25, null);
-    log("已模糊状态栏区域");
+    log("Blurred status bar area");
 }
 ```
 
 ---
 
-## 🏗️ 项目结构
+## 🏗️ Project Structure
 
-```
+```text
 app/src/main/java/com/scriptshot/
-├── core/                           # 核心功能
-│   ├── permission/                 # 权限管理
-│   ├── preferences/                # 偏好设置
-│   ├── root/                       # Root 工具
-│   ├── screenshot/                 # 截屏实现
-│   ├── shortcut/                   # 快捷方式
-│   └── trigger/                    # 触发管道
-├── script/                         # 脚本引擎
-│   ├── api/                        # 脚本 API
+├── core/                           # Core features
+│   ├── permission/                 # Permission management
+│   ├── preferences/                # Preferences
+│   ├── root/                       # Root utilities
+│   ├── screenshot/                 # Screenshot implementation
+│   ├── shortcut/                   # Shortcuts
+│   └── trigger/                    # Trigger pipeline
+├── script/                         # Script engine
+│   ├── api/                        # Script APIs
 │   │   ├── FilesApi.java
 │   │   ├── ImgApi.java
 │   │   ├── NotificationApi.java
 │   │   ├── ShareApi.java
 │   │   ├── ShellApi.java
 │   │   └── UiApi.java
-│   ├── storage/                    # 脚本存储
-│   └── EngineManager.java          # Rhino 引擎管理
-├── service/                        # 后台服务
+│   ├── storage/                    # Script storage
+│   └── EngineManager.java          # Rhino engine manager
+├── service/                        # Background services
 │   ├── ScreenshotAccessibilityService.java
 │   ├── ScriptShotTileService.java
 │   └── ScriptShotTriggerService.java
-└── ui/                             # 用户界面
+└── ui/                             # User interface
     ├── ConfigActivity.java
     ├── ScriptManagerActivity.java
     └── ...
@@ -271,37 +273,37 @@ app/src/main/java/com/scriptshot/
 
 ---
 
-## 🔧 构建项目
+## 🔧 Building
 
-### 环境要求
+### Requirements
 
-- JDK 17+
-- Android SDK (API 34)
-- Gradle 8.7+
+- JDK 17+  
+- Android SDK (API 34)  
+- Gradle 8.7+  
 
-### 构建步骤
+### Build steps
 
 ```bash
-# 克隆项目
+# Clone the project
 git clone https://github.com/gao-gao-zai/ScriptShot.git
 cd ScriptShot
 
-# 构建 Debug APK
+# Build Debug APK
 ./gradlew assembleDebug
 
-# 构建 Release APK
+# Build Release APK
 ./gradlew assembleRelease
 ```
 
-APK 输出位置：`app/build/outputs/apk/`
+APK output location: `app/build/outputs/apk/`
 
 ---
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 [MIT 许可证](LICENSE) 开源。
+This project is open-sourced under the [MIT License](LICENSE).
 
-```
+```text
 MIT License
 
 Copyright (c) 2025 gao-gao-zai
@@ -313,18 +315,19 @@ in the Software without restriction...
 
 ---
 
-## 🙏 致谢
+## 🙏 Acknowledgements
 
-- [Mozilla Rhino](https://github.com/mozilla/rhino) - JavaScript 引擎
-- [Material Design](https://material.io/) - UI 设计规范
+- [Mozilla Rhino](https://github.com/mozilla/rhino) - JavaScript engine  
+- [Material Design](https://material.io/) - UI design guidelines  
 
 ---
 
-## 📮 反馈与贡献
+## 📮 Feedback & Contributions
 
-欢迎提交 Issue 和 Pull Request！
+Issues and pull requests are welcome!
 
-如有问题或建议，请通过以下方式联系：
-- 提交 [Issue](https://github.com/gao-gao-zai/ScriptShot/issues)
-- 查看 [完整使用文档](UserGuide.md)
+If you have any questions or suggestions, you can:
+- Open an [Issue](https://github.com/gao-gao-zai/ScriptShot/issues)  
+- Read the [full user guide](UserGuide.md)
+
 

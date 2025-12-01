@@ -87,18 +87,44 @@ ScriptShot 是一个基于截图的自动化小工具：
 
 ---
 
-## 4. 快捷方式与快速设置磁贴
+## 4. 快捷方式与快速设置磁贴：用户如何“一键调用” ScriptShot
 
-为方便快速触发自动化，ScriptShot 提供了两个入口：
+为方便快速触发自动化，ScriptShot 提供了两个主要入口，用于“**一键调用：截屏 + 执行脚本**”：
 
-### 4.1 桌面快捷方式（Shortcut）
+- **桌面图标 / 快捷方式**：适合经常用到的固定动作；
+- **快捷设置磁贴**：适合从通知栏快速调用，几乎不打断当前操作。
+
+### 4.1 桌面快捷方式（Capture Shortcut）
 
 在配置页中：
 
-- 点击 **Create capture shortcut**：
-  - 如果你的桌面支持固定快捷方式，会弹系统对话框，确认后在桌面添加一个 **ScriptShot Capture** 图标；
-  - 在旧系统或旧桌面中，会尝试通过广播 `INSTALL_SHORTCUT` 创建图标，结果以桌面实现为准；
-- 之后你只需点击该快捷方式，就会触发一次“静默截屏 + 自动化脚本”。
+1. 找到 **Quick actions** 区域，点击 **Create capture shortcut**；
+2. 可能出现两种行为：
+   - 如果你的桌面（Launcher）支持“固定快捷方式”（Android 8.0+ 常见）：
+     - 系统会弹出一个确认对话框，标题通常是“添加到主屏幕”等；
+     - 确认后，桌面上会多出一个 **ScriptShot Capture** 图标；
+   - 在部分旧系统或旧桌面中：
+     - 应用会通过广播 `INSTALL_SHORTCUT` 尝试创建图标；
+     - 是否成功、图标名称和位置由桌面程序自己决定。
+
+之后你只需点击这个 **Capture 快捷方式**，就会自动执行如下流程：
+
+1. ScriptShot 在后台检查：
+   - 是否有媒体读取权限；
+   - 是否已配置 Root / 无障碍截屏通道；
+2. 使用你在配置页中选择的方式（Root 或 Accessibility）触发一次系统截屏；
+3. 等待截图文件写入系统图库后，读取这张最新截图；
+4. 使用“**当前默认脚本**”对这张截图进行处理；
+5. 根据你在“Automation & feedback”中的开关显示或隐藏 toast 提示。
+
+从脚本视角看，通过 Capture 快捷方式调用时，环境中常见的值大致是：
+
+- `screenshotPath`：刚刚截图文件的路径；
+- `env.source`：通常为 `"shortcut_capture"`；
+- `env.silent`：一般为 `true`（静默模式）；
+- `env.skipCapture`：为 `false`（表示本次确实执行了截图操作）。
+
+> 如果你希望“只执行某个脚本而不截屏”，可以使用“脚本专用快捷方式”，见下文 **5.5 小节**。
 
 ### 4.2 快速设置磁贴（Quick Settings Tile）
 
@@ -106,13 +132,30 @@ ScriptShot 是一个基于截图的自动化小工具：
 
 > Add the ScriptShot quick settings tile from the notification shade to trigger silent captures.
 
-操作方式：
+具体操作方式：
 
-1. 从屏幕顶部下拉状态栏，打开快速设置面板；
-2. 点击编辑按钮（通常是一个铅笔/编辑图标）；
-3. 在可用磁贴列表中找到 **ScriptShot**；
-4. 拖动它到上方已启用区域，保存；
-5. 之后你只要点一下这个磁贴，就可以快速触发脚本自动化。
+1. 从屏幕顶部下拉状态栏，打开 **快速设置面板**；
+2. 点击右下角或右上角的 **编辑/铅笔图标**，进入“编辑磁贴”界面；
+3. 在“可用磁贴”列表中找到 **ScriptShot**：
+   - 图标通常使用应用图标；
+   - 文本为 ScriptShot 或类似字样；
+4. 长按该图标，将它拖到上方“已启用磁贴”区域中；
+5. 退出编辑并保存。
+
+今后你只要下拉通知栏，点击 **ScriptShot 磁贴**，就会触发一次“静默截屏 + 默认脚本”，与 Capture 快捷方式类似，但有几点差异：
+
+- **调用入口不同**：
+  - Capture 快捷方式来自桌面图标；
+  - 磁贴来自通知栏快速设置。
+- **适合场景略有不同**：
+  - 快捷方式更适合“回主屏后再操作”的场景；
+  - 磁贴适合你在任意界面、甚至全屏 App 中，快速下拉触发。
+
+从脚本视角看，通过磁贴调用时，环境中常见的值大致是：
+
+- `screenshotPath`：刚刚截图文件的路径；
+- `env.source`：为 `"qs_tile"`；
+- 其它字段（如 `env.silent`、`env.scriptName`）与 Capture 快捷方式类似。
 
 ---
 
@@ -165,6 +208,35 @@ ScriptShot 是一个基于截图的自动化小工具：
 
 - 每次截屏后都会使用“默认脚本”执行；
 - 如果你从某个脚本相关的快捷方式触发，则会执行对应脚本。
+
+### 5.5 “脚本专用”桌面快捷方式是如何调用的？
+
+`Create home shortcut` 创建的是“**脚本专用快捷方式**”，与前面 4.1 小节的 Capture 快捷方式有以下区别：
+
+- **Capture 快捷方式**：始终使用“当前默认脚本”；
+- **脚本专用快捷方式**：**绑定到某一个脚本名**，每次点击都执行这一份脚本，无论默认脚本后来怎么改。
+
+从用户角度：
+
+1. 在脚本管理页（Script manager）中选中你想要的脚本；
+2. 点击 **Create home shortcut**；
+3. 按照桌面或系统提示完成“添加到主屏幕”操作；
+4. 之后这个图标就代表“**只执行这一个脚本**”的入口。
+
+从内部实现角度，大致等价于：
+
+- 创建一个 Intent，其 `action` 为 `com.scriptshot.action.RUN_SCRIPT`；
+- 在 Extra 中写入该脚本名，以及静默标志；
+- 由 ScriptShot 内部的触发管道根据这个 Intent 来：
+  - 可选地执行一次截屏；
+  - 然后只运行指定脚本。
+
+从脚本视角看，通过“脚本专用快捷方式”调用时常见特征：
+
+- `env.scriptName`：为当前脚本名；
+- `env.requestedScriptName`：也会设置为该脚本名；
+- `env.source`：为 `"shortcut_script"`；
+- 其它行为（是否截屏、是否静默）与 Capture 快捷方式类似，具体取决于内部触发配置。
 
 ---
 
@@ -384,6 +456,152 @@ if (!screenshotPath) {
 ```
 
 > 你可以在 `engine.log` 文件中找到 `log()` 输出的调试信息，位置在应用私有目录下的 `files/scripts/engine.log`。
+
+### 6.7 从其他应用或 ADB “调用” ScriptShot（高级内容）
+
+这一小节主要面向 **有开发能力的高级用户**，介绍如何从 **自己的 App** 或 **ADB 命令行** 主动调用 ScriptShot，让它执行一次“截屏 + 脚本”或“只执行脚本”。
+
+#### 6.7.1 可用的触发入口
+
+ScriptShot 暴露了两个重要的组件，供外部调用：
+
+- `ShotTriggerActivity`：前台透明 Activity，适合需要与用户交互的场景；
+- `ScriptShotTriggerService`：后台 Service，适合“静默调用、只在日志中看到结果”的场景。
+
+它们都支持两个 Action：
+
+- `com.scriptshot.action.RUN_SCRIPT`：执行脚本（可选是否先截屏）；
+- `com.scriptshot.action.CAPTURE`：主要用于表示“触发一次截屏动作”，在内部仍会和脚本管道配合。
+
+#### 6.7.2 支持的 Intent 参数（Extras）
+
+在外部 App 或 ADB 中，你可以通过以下 Extra 来控制 ScriptShot 的行为（常量定义在 `TriggerContract` 中）：
+
+- **脚本相关**
+  - `com.scriptshot.extra.SCRIPT_NAME`（字符串）：
+    - 要执行的脚本名，例如：`"rotate_screenshot.js"`；
+    - 不填时 ScriptShot 会使用当前“默认脚本”。
+- **行为控制**
+  - `com.scriptshot.extra.SILENT`（布尔，默认 `true`）：
+    - 是否静默模式，通常影响 toast 等提示；
+  - `com.scriptshot.extra.SKIP_CAPTURE`（布尔，默认 `false`）：
+    - `false`：先截一张新图，再把这张截图路径传给脚本；
+    - `true`：跳过截屏，只执行脚本（脚本可自行读取旧截图或其它文件）。
+  - `com.scriptshot.extra.SUPPRESS_FEEDBACK`（布尔）：
+    - 是否完全屏蔽由 ScriptShot 主动发起的反馈（toast 等）。
+- **来源标记**
+  - `com.scriptshot.extra.ORIGIN`（字符串）：
+    - 用于标记本次触发来源，在脚本中可以从 `env.source` 读取；
+    - 不传时，系统会自动推断为 `third_party` 或 `app`。
+
+此外，你自己在 Intent 上附加的其它普通 Extra（例如 `putExtra("orderId", 123)`）会被 ScriptShot 收集到脚本环境中的 `env.extras` 中，脚本里可以直接读取：
+
+```js
+log("env.extras = " + JSON.stringify(env.extras));
+```
+
+#### 6.7.3 在自己的 Android App 中调用 ScriptShot
+
+下面是一个在 **自有 App** 中，通过 Service 静默触发 ScriptShot 的示例代码（Java）：
+
+```java
+// 1. 构造一个 Intent，指向 ScriptShot 的后台触发 Service
+Intent intent = new Intent();
+intent.setClassName(
+    "com.scriptshot",                        // ScriptShot 包名
+    "com.scriptshot.service.ScriptShotTriggerService"  // 触发 Service 类名
+);
+
+// 2. 指定 Action：运行脚本
+intent.setAction("com.scriptshot.action.RUN_SCRIPT");
+
+// 3. 配置 Extra：要执行的脚本名、是否静默、是否截屏
+intent.putExtra("com.scriptshot.extra.SCRIPT_NAME", "rotate_screenshot.js");
+intent.putExtra("com.scriptshot.extra.SILENT", true);       // 静默模式
+intent.putExtra("com.scriptshot.extra.SKIP_CAPTURE", false); // 需要截一张新图
+intent.putExtra("com.scriptshot.extra.ORIGIN", "my_app");   // 自定义来源标记
+
+// 4. 业务相关参数（会出现在 env.extras 中）
+intent.putExtra("orderId", 12345);
+intent.putExtra("mode", "fast");
+
+// 5. 启动 Service
+context.startService(intent);
+```
+
+脚本中可以配合 `env` 和 `env.extras` 做出不同行为，例如：
+
+```js
+log("Triggered from: " + env.source);
+log("Extras: " + JSON.stringify(env.extras));
+
+if (env.extras && env.extras.mode === "fast") {
+  // 做一些“快速模式”的处理
+}
+```
+
+如果你希望以 Activity 方式触发（比如需要与用户交互，或者不想依赖后台 Service），可以改为：
+
+```java
+Intent intent = new Intent();
+intent.setClassName(
+    "com.scriptshot",
+    "com.scriptshot.ui.ShotTriggerActivity"
+);
+intent.setAction("com.scriptshot.action.RUN_SCRIPT");
+intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+// 同样附加刚才那些 Extra
+intent.putExtra("com.scriptshot.extra.SCRIPT_NAME", "rotate_screenshot.js");
+intent.putExtra("com.scriptshot.extra.SILENT", false);        // 可以让脚本多给用户反馈
+intent.putExtra("com.scriptshot.extra.SKIP_CAPTURE", false);
+intent.putExtra("com.scriptshot.extra.ORIGIN", "my_app_ui");
+
+context.startActivity(intent);
+```
+
+#### 6.7.4 通过 ADB 命令行调用 ScriptShot
+
+如果你在电脑上连接了手机（已开启开发者模式和 USB 调试），也可以直接用 `adb` 命令触发 ScriptShot。这对 **自动化测试** 或 **脚本批量处理** 很有用。
+
+- **示例 1：通过 Service 静默触发一次“截屏 + 脚本”**
+
+```bash
+adb shell am startservice \
+  -n com.scriptshot/.service.ScriptShotTriggerService \
+  -a com.scriptshot.action.RUN_SCRIPT \
+  --es com.scriptshot.extra.SCRIPT_NAME "rotate_screenshot.js" \
+  --ez com.scriptshot.extra.SILENT true \
+  --ez com.scriptshot.extra.SKIP_CAPTURE false \
+  --es com.scriptshot.extra.ORIGIN "adb_cli" \
+  --es mode "fast"
+```
+
+- **示例 2：只运行脚本，不截屏**
+
+```bash
+adb shell am startservice \
+  -n com.scriptshot/.service.ScriptShotTriggerService \
+  -a com.scriptshot.action.RUN_SCRIPT \
+  --es com.scriptshot.extra.SCRIPT_NAME "my_script.js" \
+  --ez com.scriptshot.extra.SKIP_CAPTURE true \
+  --es com.scriptshot.extra.ORIGIN "adb_no_capture"
+```
+
+- **示例 3：以 Activity 方式触发（可能弹出 UI）**
+
+```bash
+adb shell am start \
+  -n com.scriptshot/.ui.ShotTriggerActivity \
+  -a com.scriptshot.action.RUN_SCRIPT \
+  --es com.scriptshot.extra.SCRIPT_NAME "rotate_screenshot.js"
+```
+
+在这些场景下，你可以配合 `adb logcat` 观察脚本执行情况和日志输出：
+
+```bash
+adb logcat | Select-String -Pattern "ScriptShot|EngineManager|TriggerPipeline"
+```
 
 ---
 
