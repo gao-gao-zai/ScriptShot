@@ -4,6 +4,11 @@
     <string name="accessibility_service_description">ScriptShot 仅会在你手动触发时使用此服务请求截图。</string>
     <string name="screenshot_captured_toast">已捕获：%1$s</string>
     <string name="screenshot_timeout_toast">无法完成截图，请重试。</string>
+    <string name="screenshot_root_su_not_found">未找到 su 程序，请确认设备已正确 Root。</string>
+    <string name="screenshot_root_permission_denied">Root 授权被拒绝，请在 Root 管理器中允许本应用。</string>
+    <string name="screenshot_root_timeout">Root 命令执行超时，请检查 Root 管理器是否正常运行。</string>
+    <string name="screenshot_root_command_failed">截屏命令执行失败，请重试。</string>
+    <string name="screenshot_root_interrupted">截屏操作被中断。</string>
     <string name="permission_required_toast">需要读取媒体权限才能监听截图。</string>
     <string name="accessibility_required_toast">请启用 ScriptShot 无障碍服务以截取屏幕。</string>
     <string name="config_title">截屏工作流设置</string>

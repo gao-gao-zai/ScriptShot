@@ -12,15 +12,34 @@ public final class ScreenshotActionFactory {
     }
 
     public static ScreenshotAction create(Context context, boolean preferRoot) {
-        if (preferRoot && RootUtils.isRootAvailable()) {
-            Log.d(TAG, "Using root screenshot pathway");
-            return new RootScreenshotAction();
+        Log.i(TAG, "[FACTORY] Creating ScreenshotAction, preferRoot=" + preferRoot);
+        
+        if (preferRoot) {
+            Log.d(TAG, "[FACTORY] Checking cached Root availability...");
+            boolean rootAvailable = RootUtils.isRootAvailable();
+            Log.d(TAG, "[FACTORY] Root cached availability: " + rootAvailable);
+            
+            if (rootAvailable) {
+                Log.i(TAG, "[FACTORY] Selected: RootScreenshotAction");
+                return new RootScreenshotAction();
+            } else {
+                Log.w(TAG, "[FACTORY] Root preferred but not available, falling back...");
+            }
         }
-        if (PermissionManager.isAccessibilityServiceEnabled(context)) {
-            Log.d(TAG, "Using accessibility screenshot pathway");
+        
+        boolean accessibilityEnabled = PermissionManager.isAccessibilityServiceEnabled(context);
+        Log.d(TAG, "[FACTORY] Accessibility service enabled: " + accessibilityEnabled);
+        
+        if (accessibilityEnabled) {
+            Log.i(TAG, "[FACTORY] Selected: AccessibilityScreenshotAction");
             return new AccessibilityScreenshotAction();
         }
-        Log.w(TAG, "No screenshot channel available (root/accessibility both unavailable)");
-        return () -> false;
+        
+        Log.e(TAG, "[FACTORY] CRITICAL: No screenshot channel available!");
+        Log.e(TAG, "[FACTORY] Root available: false, Accessibility enabled: false");
+        return () -> {
+            Log.e(TAG, "[FACTORY] Null action invoked - this should never happen");
+            return false;
+        };
     }
 }

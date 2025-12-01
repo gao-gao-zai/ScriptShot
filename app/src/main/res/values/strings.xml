@@ -4,6 +4,11 @@
     <string name="accessibility_service_description">ScriptShot uses this service solely to request screenshots when you explicitly trigger it.</string>
     <string name="screenshot_captured_toast">Captured: %1$s</string>
     <string name="screenshot_timeout_toast">Unable to capture screenshot. Please try again.</string>
+    <string name="screenshot_root_su_not_found">su binary not found. Please ensure your device is properly rooted.</string>
+    <string name="screenshot_root_permission_denied">Root permission denied. Please grant access in your root manager.</string>
+    <string name="screenshot_root_timeout">Root command timed out. Please check if your root manager is working properly.</string>
+    <string name="screenshot_root_command_failed">Screenshot command failed. Please try again.</string>
+    <string name="screenshot_root_interrupted">Screenshot operation was interrupted.</string>
     <string name="permission_required_toast">Storage permission is required to monitor screenshots.</string>
     <string name="accessibility_required_toast">Enable the ScriptShot accessibility service to capture screenshots.</string>
     <string name="config_title">ScriptShot Setup</string>

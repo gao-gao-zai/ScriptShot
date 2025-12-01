@@ -28,6 +28,10 @@ public final class ScreenshotContentObserver extends ContentObserver {
     private static final long STABILIZE_DELAY_MS = 100L;
     private static final long START_TIME_DRIFT_MS = 5_000L;
     private static final int MAX_RECENT_ROWS = 5;
+    
+    // 主动轮询配置：不完全依赖 MediaStore 的 onChange 通知
+    private static final long POLL_INTERVAL_MS = 500L;  // 每500ms轮询一次
+    private static final int MAX_POLL_ATTEMPTS = 20;    // 最多轮询20次（10秒）
 
     public interface Callback {
         void onScreenshotCaptured(@NonNull ScreenshotFile file);
@@ -51,7 +55,10 @@ public final class ScreenshotContentObserver extends ContentObserver {
     private final ContentResolver resolver;
     private final long captureStartTime;
     private final Callback callback;
+    private final Handler handler;
     private boolean dispatched;
+    private int pollAttempts = 0;
+    private final Runnable pollRunnable = this::pollForScreenshot;
 
     public ScreenshotContentObserver(Context context, Handler handler, long captureStartTime, Callback callback) {
         super(handler);
@@ -59,39 +66,89 @@ public final class ScreenshotContentObserver extends ContentObserver {
         this.resolver = context.getContentResolver();
         this.captureStartTime = captureStartTime;
         this.callback = callback;
+        this.handler = handler;
     }
 
     public void register() {
         resolver.registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, this);
-        Log.d(TAG, "Registered MediaStore observer @" + captureStartTime);
+        Log.i(TAG, "[OBSERVER] Registered MediaStore observer, captureStartTime=" + captureStartTime);
+        Log.d(TAG, "[OBSERVER] Listening for new images in MediaStore.Images.Media.EXTERNAL_CONTENT_URI");
+        
+        // 启动主动轮询，不完全依赖 MediaStore 的 onChange 通知
+        // 某些设备上 onChange 通知可能延迟很长时间
+        Log.i(TAG, "[POLL] Starting active polling (interval=" + POLL_INTERVAL_MS + "ms, maxAttempts=" + MAX_POLL_ATTEMPTS + ")");
+        handler.postDelayed(pollRunnable, POLL_INTERVAL_MS);
     }
 
     public void unregister() {
+        // 停止轮询
+        handler.removeCallbacks(pollRunnable);
+        Log.d(TAG, "[POLL] Stopped active polling");
+        
         try {
             resolver.unregisterContentObserver(this);
-            Log.d(TAG, "Unregistered MediaStore observer");
-        } catch (IllegalStateException ignored) {
+            Log.i(TAG, "[OBSERVER] Unregistered MediaStore observer");
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "[OBSERVER] Failed to unregister observer (may already be unregistered)");
+        }
+    }
+    
+    /**
+     * 主动轮询 MediaStore 查找新截图
+     * 不完全依赖 ContentObserver 的 onChange 回调，因为某些设备上回调延迟很大
+     */
+    private void pollForScreenshot() {
+        if (dispatched) {
+            Log.d(TAG, "[POLL] Already dispatched, stopping poll");
+            return;
+        }
+        
+        pollAttempts++;
+        long elapsed = System.currentTimeMillis() - captureStartTime;
+        Log.d(TAG, "[POLL] Poll attempt " + pollAttempts + "/" + MAX_POLL_ATTEMPTS + " (" + elapsed + "ms since capture)");
+        
+        ScreenshotFile file = queryLatest(null);
+        if (file != null) {
+            dispatched = true;
+            Log.i(TAG, "[POLL] SUCCESS: Found screenshot via polling after " + pollAttempts + " attempts (" + elapsed + "ms)");
+            callback.onScreenshotCaptured(file);
+            return;
+        }
+        
+        if (pollAttempts < MAX_POLL_ATTEMPTS) {
+            handler.postDelayed(pollRunnable, POLL_INTERVAL_MS);
+        } else {
+            Log.w(TAG, "[POLL] Max poll attempts reached, relying on onChange callback only");
         }
     }
 
     @Override
     public void onChange(boolean selfChange, @Nullable Uri uri) {
-        Log.d(TAG, "MediaStore onChange selfChange=" + selfChange + " uri=" + uri);
+        long changeTime = System.currentTimeMillis();
+        long timeSinceCapture = changeTime - captureStartTime;
+        Log.i(TAG, "[OBSERVER] ========== MediaStore onChange ==========");
+        Log.i(TAG, "[OBSERVER] Received change notification " + timeSinceCapture + "ms after capture start");
+        Log.d(TAG, "[OBSERVER] selfChange=" + selfChange + " uri=" + uri);
+        
         if (dispatched) {
-            Log.d(TAG, "Ignoring onChange because screenshot already dispatched");
+            Log.d(TAG, "[OBSERVER] Ignoring: screenshot already dispatched");
             return;
         }
+        
+        Log.d(TAG, "[OBSERVER] Querying for latest screenshot...");
         ScreenshotFile file = queryLatest(uri);
         if (file != null) {
             dispatched = true;
+            Log.i(TAG, "[OBSERVER] SUCCESS: Found screenshot file, dispatching callback");
             callback.onScreenshotCaptured(file);
         } else {
-            Log.d(TAG, "Query after onChange did not yield a screenshot");
+            Log.w(TAG, "[OBSERVER] No matching screenshot found in this onChange event");
         }
     }
 
     @Nullable
     private ScreenshotFile queryLatest(@Nullable Uri uriHint) {
+        Log.d(TAG, "[QUERY] Starting MediaStore query, uriHint=" + uriHint);
         Uri target = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         Uri queryUri = target.buildUpon()
             .appendQueryParameter("limit", String.valueOf(MAX_RECENT_ROWS))
@@ -106,64 +163,91 @@ public final class ScreenshotContentObserver extends ContentObserver {
         };
         String order = MediaStore.Images.Media.DATE_ADDED + " DESC, " + MediaStore.Images.Media.DATE_MODIFIED + " DESC";
         ScreenshotFile fallbackCandidate = null;
+        
+        long queryStart = System.currentTimeMillis();
         try (Cursor cursor = resolver.query(queryUri, projection, null, null, order)) {
+            long queryTime = System.currentTimeMillis() - queryStart;
+            
             if (cursor == null || !cursor.moveToFirst()) {
-                Log.d(TAG, "MediaStore query returned empty cursor");
+                Log.w(TAG, "[QUERY] MediaStore query returned empty cursor (took " + queryTime + "ms)");
                 return null;
             }
+            
+            int rowCount = cursor.getCount();
+            Log.d(TAG, "[QUERY] Found " + rowCount + " recent images (query took " + queryTime + "ms)");
+            Log.d(TAG, "[QUERY] Threshold: files added after " + (captureStartTime - START_TIME_DRIFT_MS) + " (captureStart - " + START_TIME_DRIFT_MS + "ms drift)");
+            
+            int rowIndex = 0;
             do {
+                rowIndex++;
                 long addedSeconds = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED));
                 long addedMillis = addedSeconds * 1000L;
+                String displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME));
+                String bucket = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+                
+                Log.d(TAG, "[QUERY] Row " + rowIndex + ": " + displayName + " bucket=" + bucket + " added=" + addedSeconds + "s (" + addedMillis + "ms)");
+                
                 if (addedMillis < captureStartTime - START_TIME_DRIFT_MS) {
-                    Log.d(TAG, "Skipping row with DATE_ADDED=" + addedSeconds + " (before threshold)");
+                    Log.d(TAG, "[QUERY] Skipping: DATE_ADDED " + addedMillis + " < threshold " + (captureStartTime - START_TIME_DRIFT_MS));
                     continue;
                 }
-                String bucket = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+                
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
                 String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
-                String displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME));
                 long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE));
                 Uri contentUri = ContentUris.withAppendedId(target, id);
                 ScreenshotFile candidate = new ScreenshotFile(contentUri, path, displayName, size);
 
-                if (isLikelyScreenshotBucket(bucket)) {
+                boolean likelyScreenshot = isLikelyScreenshotBucket(bucket);
+                Log.d(TAG, "[QUERY] Candidate: id=" + id + " size=" + size + " likelyScreenshot=" + likelyScreenshot);
+
+                if (likelyScreenshot) {
+                    Log.d(TAG, "[QUERY] Attempting to stabilize likely screenshot...");
                     if (stabilize(candidate)) {
-                        Log.d(TAG, "Stabilized screenshot file=" + displayName + " size=" + candidate.sizeBytes);
+                        Log.i(TAG, "[QUERY] SUCCESS: Stabilized screenshot file=" + displayName + " finalSize=" + candidate.sizeBytes);
                         return candidate;
                     }
-                    Log.w(TAG, "Failed to stabilize likely screenshot; continue searching");
+                    Log.w(TAG, "[QUERY] Failed to stabilize likely screenshot, continuing search...");
                     continue;
                 }
 
                 if (fallbackCandidate == null) {
-                    Log.d(TAG, "Saving fallback candidate from bucket=" + bucket);
+                    Log.d(TAG, "[QUERY] Saving as fallback candidate (bucket=" + bucket + " not a screenshot folder)");
                     if (stabilize(candidate)) {
                         fallbackCandidate = candidate;
                     }
                 }
             } while (cursor.moveToNext());
         } catch (Exception e) {
-            Log.e(TAG, "Failed to query MediaStore", e);
+            Log.e(TAG, "[QUERY] Failed to query MediaStore", e);
         }
+        
         if (fallbackCandidate != null) {
-            Log.w(TAG, "Using fallback screenshot candidate (bucket not matched)");
+            Log.w(TAG, "[QUERY] Using fallback candidate: " + fallbackCandidate.displayName);
             return fallbackCandidate;
         }
+        
+        Log.w(TAG, "[QUERY] No suitable screenshot found in recent images");
         return null;
     }
 
     private boolean stabilize(ScreenshotFile file) {
+        Log.d(TAG, "[STABILIZE] Waiting for file to finish writing: " + file.displayName);
         int attempts = 0;
         while (attempts < MAX_STABILIZE_ATTEMPTS) {
             long currentSize = resolveFileSize(file);
             if (currentSize > 0) {
                 file.sizeBytes = currentSize;
+                Log.d(TAG, "[STABILIZE] File ready after " + attempts + " attempts, size=" + currentSize + " bytes");
                 return true;
             }
             attempts++;
+            if (attempts % 5 == 0) {
+                Log.d(TAG, "[STABILIZE] Still waiting... attempt " + attempts + "/" + MAX_STABILIZE_ATTEMPTS);
+            }
             SystemClock.sleep(STABILIZE_DELAY_MS);
         }
-        Log.w(TAG, "File size stuck at 0 after " + MAX_STABILIZE_ATTEMPTS + " attempts");
+        Log.e(TAG, "[STABILIZE] FAILED: File size stuck at 0 after " + MAX_STABILIZE_ATTEMPTS + " attempts (" + (MAX_STABILIZE_ATTEMPTS * STABILIZE_DELAY_MS) + "ms)");
         return false;
     }
 
